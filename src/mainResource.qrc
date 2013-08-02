@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/logo">
+        <file>SImpleDriveLogo</file>
+    </qresource>
+</RCC>
