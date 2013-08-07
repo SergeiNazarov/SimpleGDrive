@@ -2,6 +2,11 @@ SimpleDrive
 ===========
 Qt based client for Google Drive.
 
+Requirements
+============
+	- Qt 5.0 or higher
+	- C++ compiler supporting the C++11 standard
+
 License
 ========
 
