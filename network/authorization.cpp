@@ -15,8 +15,12 @@ Authorization::Authorization(QObject *parent):
 
     pNetworkAccessManager = new QNetworkAccessManager(this);
     pNetworkAccessManager_refresh = new QNetworkAccessManager(this);
+    pNetworkAccessManager_get_email = new QNetworkAccessManager(this);
     connect(pNetworkAccessManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(getToken(QNetworkReply*)));
     connect(pNetworkAccessManager_refresh, SIGNAL(finished(QNetworkReply*)), this, SLOT(getRefreshToken(QNetworkReply*)));
+    connect(pNetworkAccessManager_get_email, SIGNAL(finished(QNetworkReply*)), this, SLOT(getEmail(QNetworkReply*)));
+
+    connect(this,SIGNAL(tokenObtained()), this, SLOT(email()));
 }
 
 Authorization::~Authorization(){
@@ -81,4 +85,23 @@ void Authorization::getRefreshToken(QNetworkReply *reply){
     access_token = sett2.value(QString("access_token")).toString();
     QSettings settings("SimpleDrive", "General");
     settings.setValue("access_token", access_token);
+}
+
+void Authorization::email(){
+    QSettings settings("SimpleDrive", "General");
+    access_token=settings.value("access_token").toString();
+    QUrl url("https://www.googleapis.com/oauth2/v2/userinfo");
+    QNetworkRequest request;
+    request.setUrl(url);
+    request.setRawHeader("Authorization", QString("Bearer %1").arg(access_token).toLatin1());
+    pNetworkAccessManager_get_email->get(request);
+}
+
+void Authorization::getEmail(QNetworkReply *reply){
+    QString json = reply->readAll();
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(json.toUtf8());
+    QJsonObject sett2 = jsonDoc.object();
+    QSettings s("SimpleDrive", "General");
+    s.setValue("email", sett2["email"].toString());
+
 }

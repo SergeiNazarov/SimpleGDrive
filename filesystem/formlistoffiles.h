@@ -9,18 +9,19 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
+#include <QTreeWidget>
+
 
 class FormListOfFiles : public QObject
 {
     Q_OBJECT
 public:
-    explicit FormListOfFiles(QObject *parent = 0);
-    void formList();
+    explicit FormListOfFiles(QTreeWidget *tw, QObject *parent = 0);
     void getRootList();
     void getFullList();
+    void addRootQTreeWidgetItem(QString id, QSettings *s, QString path);
 
 signals:
-    void rootListFormed(FormListOfFiles*);
     void fullListFormed(FormListOfFiles*);
     
 public slots:
@@ -31,14 +32,20 @@ private slots:
     void getReply(QNetworkReply *);
 
 private:
+    void addChildQTreeWidgetItem(QTreeWidgetItem *parent, QString parentId, QSettings *s, QStringList filesInFolders, QString path);
+    void cleanUpFilesList();
 
+    void formList(QString json);
     void formRootList(QString json);
 
     QString access_token;
     QString jsonWithAllFiles;
+    QStringList filesInFolders;
 
     QNetworkAccessManager *pNetworkAccessManager_root;
     QNetworkAccessManager *pNetworkAccessManager;
+
+    QTreeWidget *treeWidget;
     
 };
 

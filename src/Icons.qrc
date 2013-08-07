@@ -1,19 +1,19 @@
 <RCC>
-    <qresource prefix="/FilesIcons">
-        <file>src/Icons/icon_9_archive_list.png</file>
-        <file>src/Icons/icon_10_audio_list.png</file>
-        <file>src/Icons/icon_10_excel_list.png</file>
-        <file>src/Icons/icon_10_generic_list.png</file>
-        <file>src/Icons/icon_10_pdf_list.png</file>
-        <file>src/Icons/icon_10_word_list.png</file>
-        <file>src/Icons/icon_11_collection_list.png</file>
-        <file>src/Icons/icon_11_document_list.png</file>
-        <file>src/Icons/icon_11_drawing_list.png</file>
-        <file>src/Icons/icon_11_form_list.png</file>
-        <file>src/Icons/icon_11_image_list.png</file>
-        <file>src/Icons/icon_11_presentation_list.png</file>
-        <file>src/Icons/icon_11_shared_collection_list.png</file>
-        <file>src/Icons/icon_11_spreadsheet_list.png</file>
-        <file>src/Icons/icon_11_video_list.png</file>
+    <qresource prefix="/fileIcons">
+        <file>icons/icon_9_archive_list.png</file>
+        <file>icons/icon_10_audio_list.png</file>
+        <file>icons/icon_10_excel_list.png</file>
+        <file>icons/icon_10_generic_list.png</file>
+        <file>icons/icon_10_pdf_list.png</file>
+        <file>icons/icon_10_word_list.png</file>
+        <file>icons/icon_11_collection_list.png</file>
+        <file>icons/icon_11_document_list.png</file>
+        <file>icons/icon_11_drawing_list.png</file>
+        <file>icons/icon_11_form_list.png</file>
+        <file>icons/icon_11_image_list.png</file>
+        <file>icons/icon_11_presentation_list.png</file>
+        <file>icons/icon_11_shared_collection_list.png</file>
+        <file>icons/icon_11_spreadsheet_list.png</file>
+        <file>icons/icon_11_video_list.png</file>
     </qresource>
 </RCC>

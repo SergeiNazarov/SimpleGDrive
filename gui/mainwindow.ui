@@ -9,9 +9,21 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>751</width>
-    <height>593</height>
+    <width>750</width>
+    <height>600</height>
    </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>750</width>
+    <height>600</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>750</width>
+    <height>600</height>
+   </size>
   </property>
   <property name="mouseTracking">
    <bool>true</bool>
@@ -26,7 +38,7 @@
    <string>SimpleDrive</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../src/mainResource.qrc">
+   <iconset>
     <normaloff>:/logo/SImpleDriveLogo</normaloff>:/logo/SImpleDriveLogo</iconset>
   </property>
   <property name="iconSize">
@@ -51,10 +63,10 @@
    <widget class="QTabWidget" name="tabWidget">
     <property name="geometry">
      <rect>
-      <x>290</x>
+      <x>230</x>
       <y>10</y>
-      <width>441</width>
-      <height>501</height>
+      <width>511</width>
+      <height>511</height>
      </rect>
     </property>
     <property name="currentIndex">
@@ -64,82 +76,109 @@
      <attribute name="title">
       <string>Sync</string>
      </attribute>
-     <widget class="QLabel" name="labelListOfFIles">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>10</y>
-        <width>71</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>List of fIles</string>
-      </property>
-     </widget>
-     <widget class="QScrollArea" name="scrollArea">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>30</y>
-        <width>411</width>
-        <height>311</height>
-       </rect>
-      </property>
-      <property name="widgetResizable">
-       <bool>true</bool>
-      </property>
-      <widget class="QWidget" name="scrollAreaWidgetContents">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>0</y>
-         <width>409</width>
-         <height>309</height>
-        </rect>
-       </property>
-       <widget class="QTreeWidget" name="treeWidget">
-        <property name="geometry">
-         <rect>
-          <x>0</x>
-          <y>0</y>
-          <width>411</width>
-          <height>311</height>
-         </rect>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <widget class="QLabel" name="labelListOfFIles">
+        <property name="text">
+         <string>List of fIles</string>
         </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QTreeWidget" name="treeWidget">
         <column>
          <property name="text">
-          <string>1</string>
+          <string>Title</string>
          </property>
         </column>
-        <item>
-         <property name="text">
-          <string>New Item</string>
-         </property>
-         <item>
-          <property name="text">
-           <string>New Subitem</string>
-          </property>
-          <item>
-           <property name="text">
-            <string>New Subitem</string>
-           </property>
-           <item>
-            <property name="text">
-             <string>New Subitem</string>
-            </property>
-           </item>
-          </item>
-         </item>
-        </item>
        </widget>
-      </widget>
-     </widget>
+      </item>
+     </layout>
     </widget>
     <widget class="QWidget" name="Settings">
      <attribute name="title">
       <string>Settings</string>
      </attribute>
+     <widget class="QWidget" name="gridLayoutWidget">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>60</y>
+        <width>411</width>
+        <height>51</height>
+       </rect>
+      </property>
+      <layout class="QGridLayout" name="RootDirLayout">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <item row="1" column="0">
+        <widget class="QLineEdit" name="rootDirectory">
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="rootDirLabel">
+         <property name="text">
+          <string>Root directory:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QPushButton" name="chooseDirButton">
+         <property name="text">
+          <string>Open folder</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="gridLayoutWidget_2">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>10</y>
+        <width>411</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <layout class="QGridLayout" name="gridLayout" columnstretch="10,0">
+       <item row="0" column="0">
+        <widget class="QLabel" name="LogedAs">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>161</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>You logged as: </string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QPushButton" name="logoutButton">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>Logout</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
     </widget>
     <widget class="QWidget" name="About">
      <attribute name="title">
@@ -153,7 +192,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>751</width>
+     <width>750</width>
      <height>20</height>
     </rect>
    </property>
@@ -162,7 +201,6 @@
      <string>File</string>
     </property>
     <addaction name="actionForm_files_list"/>
-    <addaction name="actionGet_refresh_token"/>
     <addaction name="actionDownload_all_files"/>
    </widget>
    <addaction name="menuFile"/>
@@ -175,7 +213,6 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionForm_files_list"/>
-   <addaction name="actionGet_refresh_token"/>
    <addaction name="actionDownload_all_files"/>
   </widget>
   <widget class="QStatusBar" name="statusBar">
@@ -188,11 +225,6 @@
     <string>Form files list</string>
    </property>
   </action>
-  <action name="actionGet_refresh_token">
-   <property name="text">
-    <string>Get refresh token</string>
-   </property>
-  </action>
   <action name="actionDownload_all_files">
    <property name="text">
     <string>Download all files</string>
@@ -200,8 +232,6 @@
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources>
-  <include location="../src/mainResource.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

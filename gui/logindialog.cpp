@@ -12,7 +12,7 @@ LoginDialog::LoginDialog(QWidget *parent) :
     connect(ui->webView, SIGNAL(loadFinished(bool)), this, SLOT(obtainCode()));
 
     EndPoint = "https://accounts.google.com/o/oauth2/auth";
-    Scope = "https://www.googleapis.com/auth/drive";
+    Scope = "https://www.googleapis.com/auth/drive+https://www.googleapis.com/auth/userinfo.email";
     ClientID = "79129249048.apps.googleusercontent.com"; //normal
     RedirectURI = "urn:ietf:wg:oauth:2.0:oob";
     ResponseType = "code";

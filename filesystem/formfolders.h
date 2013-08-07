@@ -16,7 +16,7 @@ class FormFolders : public QObject
     Q_OBJECT
 public:
     explicit FormFolders(QObject *parent = 0);
-    void makeRootFolder();
+    void makeRootFolder(QString rootDir);
 
 signals:
 
@@ -26,8 +26,7 @@ private slots:
 
 private:
     void makeOtherFolders(QString parentId, QDir currentDir);
-
-    QDir dir;
+    void linkingOnlineFiles(QString filename, QString url, QString title);
 
     QString access_token;
 

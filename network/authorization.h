@@ -22,9 +22,13 @@ public:
     void Token(QString code);
     void refreshToken();
 
+public slots:
+    void email();
+
 private slots:
     void getToken(QNetworkReply *);
     void getRefreshToken(QNetworkReply *);
+    void getEmail(QNetworkReply *);
 
 signals:
     void tokenObtained();
@@ -41,6 +45,7 @@ private:
     QString refresh_token;
 
     QNetworkAccessManager *pNetworkAccessManager;
+    QNetworkAccessManager *pNetworkAccessManager_get_email;
     QNetworkAccessManager *pNetworkAccessManager_refresh;
 
 };

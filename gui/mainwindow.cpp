@@ -3,9 +3,15 @@
 #include "network/authorization.h"
 #include "filesystem/formlistoffiles.h"
 #include "network/downloadfile.h"
-#include <QDir>
 #include "filesystem/formfolders.h"
 
+#include <QDir>
+#include <QTimer>
+#include <QFileDialog>
+#include <QProcess>
+
+
+// TODO: Make check for drive folder.
 
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -14,17 +20,15 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    ClientSecret = "sX7mhNqmBjmMtQqfznn7zRwd";
+    setSettings();
+    setFilesTree();
 
-//    ui->treeWidget->
+    refreshToken();
+    QTimer *timer = new QTimer(this);
+    connect(timer, SIGNAL(timeout()), this, SLOT(refreshToken()));
+    timer->start(3500000);
 
-
-
-    pNetworkAccessManager_download_file = new QNetworkAccessManager(this);
-
-    //    connect(pNetworkAccessManager_download_file, SIGNAL(finished(QNetworkReply*)), this, SLOT(SaveFile(QNetworkReply*)));
-    connect(this, SIGNAL(listsObatined(FormListOfFiles*)), this, SLOT(formList(FormListOfFiles*)));
-
+    connect(ui->logoutButton, SIGNAL(clicked()), this, SLOT(logout()));
 }
 
 MainWindow::~MainWindow()
@@ -32,38 +36,74 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::formList(FormListOfFiles *flof){
-    flof->formList();
-    qWarning("I'min main form list");
+void MainWindow::setSettings(){
+    QSettings s("SimpleDrive", "General");
+    ui->LogedAs->setText("You logged in as:\t"+s.value("email").toString());
+    ui->rootDirectory->setText(s.value("rootDir").toString());
+    QTimer::singleShot(120000, this, SLOT(setSettings()));
 }
 
+void MainWindow::setFilesTree(){
+    QSettings generalSettings("SimpleDrive", "General");
+    if(generalSettings.value("listFormed").toBool()){
+        FormListOfFiles flof(ui->treeWidget);
+        QSettings s("SimpleDrive", "Files");
+            s.setIniCodec("UTF-8");
+        QStringList rootFolders = s.value("rootFolders").toStringList();
+        QStringList rootFiles = s.value("rootFiles").toStringList();
+        for(auto iter = rootFolders.begin();iter!=rootFolders.end();iter++){
+            flof.addRootQTreeWidgetItem(*iter,&s, generalSettings.value("rootPath").toString());
+        }
+        for(auto iter = rootFiles.begin();iter!=rootFiles.end();iter++){
+            flof.addRootQTreeWidgetItem(*iter,&s, generalSettings.value("rootPath").toString());
+        }
+    }
+}
 
-
-
-
-void MainWindow::on_actionForm_files_list_triggered()
+void MainWindow::refreshToken()
 {
-    FormListOfFiles *flof = new FormListOfFiles();
-    flof->getRootList();
-    connect(flof, SIGNAL(rootListFormed(FormListOfFiles*)), this,SLOT(formfullList(FormListOfFiles*)));
-}
-
-void MainWindow::formfullList(FormListOfFiles *flof){
-    flof->getFullList();
-    connect(flof, SIGNAL(fullListFormed(FormListOfFiles*)), this,SLOT(formList(FormListOfFiles*)));
-}
-
-void MainWindow::on_actionGet_refresh_token_triggered()
-{
+    qWarning("refresh");
     Authorization *auth = new Authorization();
     auth->refreshToken();
 }
 
+
+void MainWindow::on_actionForm_files_list_triggered()
+{
+    FormListOfFiles *flof = new FormListOfFiles(ui->treeWidget);
+    flof->getFullList();
+    connect(flof, SIGNAL(fullListFormed(FormListOfFiles*)), this, SLOT(formRootList(FormListOfFiles*)));
+}
+
+void MainWindow::formRootList(FormListOfFiles *flof)
+{
+    flof->getRootList();
+}
+
+
 void MainWindow::on_actionDownload_all_files_triggered()
 {
-
+    QSettings s("SimpleDrive", "General");
     FormFolders *d = new FormFolders();
-    d->makeRootFolder();
-//    QDir dir("/home/s/");
-//    qWarning()<<dir.absolutePath();
-    }
+    d->makeRootFolder(s.value("rootDir").toString()); // TODO: Refactor that fucntions parameters
+
+}
+
+void MainWindow::on_chooseDirButton_clicked()
+{
+    QString rootdir = QFileDialog::getExistingDirectory(this, tr("Open Directory"), "", QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+    ui->rootDirectory->setText(rootdir);
+    QSettings s("SimpleDrive", "General");
+    s.setValue("rootDir", rootdir);
+}
+
+void MainWindow::logout(){
+//     FIXME: It's just restarting application. Not logging out. I think i need another way to do it.
+    QSettings s("SimpleDrive", "General");
+    s.remove("access_token");
+    s.remove("refresh_token");
+
+    QProcess::startDetached(QApplication::applicationFilePath());
+    exit(12);
+
+}
