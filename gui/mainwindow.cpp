@@ -52,11 +52,13 @@ void MainWindow::setFilesTree(){
         QStringList rootFolders = s.value("rootFolders").toStringList();
         QStringList rootFiles = s.value("rootFiles").toStringList();
         for(auto iter = rootFolders.begin();iter!=rootFolders.end();iter++){
-            flof.addRootQTreeWidgetItem(*iter,&s, generalSettings.value("rootPath").toString());
+            flof.addRootQTreeWidgetItem(*iter,&s, generalSettings.value("rootDir").toString());
         }
         for(auto iter = rootFiles.begin();iter!=rootFiles.end();iter++){
-            flof.addRootQTreeWidgetItem(*iter,&s, generalSettings.value("rootPath").toString());
+            flof.addRootQTreeWidgetItem(*iter,&s, generalSettings.value("rootDir").toString());
         }
+        ui->treeWidget->setSortingEnabled(true);
+        ui->treeWidget->sortByColumn(0);
     }
 }
 

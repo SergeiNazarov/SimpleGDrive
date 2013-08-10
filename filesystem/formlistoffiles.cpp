@@ -62,30 +62,36 @@ void FormListOfFiles::formRootList(QString json){
     for(auto iter = arrayWithItems.begin();iter!=arrayWithItems.end();  ++iter)
     {
         QJsonObject file = (*iter).toObject();
-        s.beginGroup(file["id"].toString());
-        s.setValue("Path", rootPath);
-        s.setValue("title", file["title"].toString());
-        s.setValue("modifiedDate", file["modifiedDate"].toString());
-        s.setValue("icon", file["iconLink"].toString().mid(44));
-        s.setValue("parentId", "root");
-        if(file["mimeType"].toString() == "application/vnd.google-apps.folder"){
-            rootFoldersList.push_back(file["id"].toString());
-        } else {
-            rootList.push_back(file["id"].toString());
-            if(file["mimeType"].toString().contains("google")){
-                //                TODO: Save links as a file for online files.
-                s.setValue("downloadUrl", file["alternateLink"].toString());
-                s.setValue("online", true);
+        QJsonObject labels_object = file["labels"].toObject();
+
+        if(!labels_object["trashed"].toBool()){
+            s.beginGroup(file["id"].toString());
+            s.setValue("Path", rootPath);
+            s.setValue("title", file["title"].toString());
+            s.setValue("modifiedDate", file["modifiedDate"].toString());
+            s.setValue("icon", file["iconLink"].toString().mid(44));
+            QJsonArray parents_array(file["parents"].toArray());
+            QJsonObject parent_object = parents_array.first().toObject();
+            s.setValue("parentId", parent_object["id"].toString());
+            if(file["mimeType"].toString() == "application/vnd.google-apps.folder"){
+                rootFoldersList.push_back(file["id"].toString());
             } else {
-                s.setValue("downloadUrl", file["downloadUrl"].toString());
+                rootList.push_back(file["id"].toString());
+                if(file["mimeType"].toString().contains("google")){
+                    //                TODO: Save links as a file for online files.
+                    s.setValue("downloadUrl", file["alternateLink"].toString());
+                    s.setValue("online", true);
+                } else {
+                    s.setValue("downloadUrl", file["downloadUrl"].toString());
+                }
+                s.setValue("originalFilename", file["originalFilename"].toString());
+                s.setValue("fileExtension", file["fileExtension"].toString());
+                s.setValue("md5Checksum", file["md5Checksum"].toString());
+                s.setValue("fileSize", file["fileSize"].toString());
             }
-            s.setValue("originalFilename", file["originalFilename"].toString());
-            s.setValue("fileExtension", file["fileExtension"].toString());
-            s.setValue("md5Checksum", file["md5Checksum"].toString());
-            s.setValue("fileSize", file["fileSize"].toString());
+            s.endGroup();
+            addRootQTreeWidgetItem(file["id"].toString(), &s, rootPath);
         }
-        s.endGroup();
-        addRootQTreeWidgetItem(file["id"].toString(), &s, rootPath);
     }
 
     if(!rootFoldersList.empty()) s.setValue("rootFolders", rootFoldersList);
@@ -148,6 +154,8 @@ void FormListOfFiles::addRootQTreeWidgetItem(QString id, QSettings *s, QString p
     if(is_folder){
         folderPath = path + "/" + title;
     }
+
+    s->setValue("filename", QString(path + "/" + title));
     QIcon icon(QString(":/fileIcons/icons/%1").arg(s->value("icon").toString()));
     s->endGroup();
     QTreeWidgetItem *itm = new QTreeWidgetItem(treeWidget);
@@ -171,6 +179,7 @@ void FormListOfFiles::addChildQTreeWidgetItem(QTreeWidgetItem *parent, QString p
                 folderPath = path + "/" + title;
             }
             s->setValue("Path", path);
+            s->setValue("filename", QString(path + "/" + title));
             QIcon icon(QString(":/fileIcons/icons/%1").arg(s->value("icon").toString()));
             s->endGroup();
             QTreeWidgetItem *itm = new QTreeWidgetItem();
@@ -189,11 +198,13 @@ void FormListOfFiles::addChildQTreeWidgetItem(QTreeWidgetItem *parent, QString p
 void FormListOfFiles::cleanUpFilesList(){
     QSettings s("SimpleDrive", "Files");
     s.setIniCodec("UTF-8");
+    int totalSize=0;
     QStringList FilesList = s.value("filesInFolders").toStringList();
     QStringList cleanedFilesList;
     for(auto iter = FilesList.begin();iter!=FilesList.end();iter++){
         s.beginGroup(*iter);
         if(s.contains("Path")){
+            totalSize+=s.value("fileSize").toInt();
             s.endGroup();
             cleanedFilesList.push_back(*iter);
         } else {
@@ -201,5 +212,7 @@ void FormListOfFiles::cleanUpFilesList(){
             s.remove(*iter);
         }
     }
+    QSettings generalSettings("SimpleDrive", "General");
+    generalSettings.setValue("totalSize", totalSize);
     s.setValue("filesInFolders", cleanedFilesList);
 }
