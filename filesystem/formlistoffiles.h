@@ -46,8 +46,7 @@ private:
 
     QMutex mutex;
 
-    QNetworkAccessManager *NetworkAccessManager;
-    QNetworkAccessManager *pNetworkAccessManager;
+    QNetworkAccessManager *networkAccessManager;
 
     QSettings *Settings;
 

@@ -1,5 +1,5 @@
 <RCC>
     <qresource prefix="/logo">
-        <file>SImpleDriveLogo.png</file>
+        <file>SImpleGDriveLogo.png</file>
     </qresource>
 </RCC>

@@ -3,7 +3,7 @@
 
 Settings::Settings()
 {
-    s=new QSettings("SimpleDrive", "General");
+    s=new QSettings("SimpleGDrive", "General");
 }
 
 void Settings::set(QString name, QString value){

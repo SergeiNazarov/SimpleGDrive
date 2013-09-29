@@ -3,7 +3,7 @@
 SimpleUpload::SimpleUpload(QObject *parent) :
     QObject(parent)
 {
-    QSettings settings("SimpleDrive", "General");
+    QSettings settings("SimpleGDrive", "General");
     access_token=settings.value("access_token").toString();
 
     pNetworkAccessManager = new QNetworkAccessManager(this);

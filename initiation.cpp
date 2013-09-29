@@ -7,7 +7,7 @@ Initiation::Initiation(MainWindow *mw, QObject *parent) :
     mw(mw)
 {
     connect(this, SIGNAL(AuthComplete()),mw, SLOT(show()));
-    QSettings settings("SimpleDrive", "General");
+    QSettings settings("SimpleGDrive", "General");
     if((!settings.value("access_token").toBool())){
         LoginDialog *lg = new LoginDialog();
         lg->show();

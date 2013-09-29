@@ -29,11 +29,11 @@
    <bool>true</bool>
   </property>
   <property name="windowTitle">
-   <string>SimpleDrive</string>
+   <string>SimpleGDrive</string>
   </property>
   <property name="windowIcon">
    <iconset>
-    <normaloff>:/logo/SImpleDriveLogo</normaloff>:/logo/SImpleDriveLogo</iconset>
+    <normaloff>:/logo/SimpleGDriveLogo</normaloff>:/logo/SimpleGDriveLogo</iconset>
   </property>
   <property name="iconSize">
    <size>

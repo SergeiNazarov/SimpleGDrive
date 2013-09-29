@@ -3,7 +3,7 @@
 MultipartUpload::MultipartUpload(QObject *parent) :
     QObject(parent)
 {
-    QSettings settings("SimpleDrive", "General");
+    QSettings settings("SimpleGDrive", "General");
     access_token=settings.value("access_token").toString();
 
     pNetworkAccessManager = new QNetworkAccessManager(this);
@@ -23,7 +23,7 @@ void MultipartUpload::startUpload(QString filename) {
     QString parentId = "root";
     QString folder = filename.replace(fileInfo.fileName(), "");
     folder.chop(1);
-    QSettings s("SimpleDrive", "Files");
+    QSettings s("SimpleGDrive", "Files");
     QStringList allFiles = s.value("rootFiles").toStringList() + s.value("filesInFolders").toStringList();
     for(auto iter = allFiles.begin();iter!=allFiles.end();iter++){
         s.beginGroup(*iter);

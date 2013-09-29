@@ -13,7 +13,7 @@ FormFolders::FormFolders(QStatusBar *status, QProgressBar *bar, QObject *parent)
     progressBar(bar),
     statusBar(status)
 {
-    QSettings settings("SimpleDrive", "General");
+    QSettings settings("SimpleGDrive", "General");
     access_token=settings.value("access_token").toString();
     numberOfFiles=0;
     n=0;
@@ -24,7 +24,7 @@ void FormFolders::makeRootFolder(QString rootDir){
     QDir dir;
     dir.cd(rootDir);
 
-    QSettings s("SimpleDrive", "Files");
+    QSettings s("SimpleGDrive", "Files");
     s.setIniCodec("UTF-8");
     QStringList rootFilesList = s.value("Files").toStringList();
     for(auto iter = rootFilesList.begin();iter!=rootFilesList.end();iter++){
@@ -51,7 +51,7 @@ void FormFolders::makeRootFolder(QString rootDir){
 }
 
 void FormFolders::makeOtherFolders(QString parentId, QDir currentDir){
-    QSettings s("SimpleDrive", "Files");
+    QSettings s("SimpleGDrive", "Files");
     s.setIniCodec("UTF-8");
     QStringList FilesList = s.value("filesInFolders").toStringList();
     for(auto iter = FilesList.begin();iter!=FilesList.end();iter++){
@@ -140,7 +140,7 @@ void FormFolders::linkingOnlineFiles(QString filename, QString url, QString titl
 
 
 void FormFolders::countTotalDriveSpace(){
-    QSettings s("SimpleDrive", "Files");
+    QSettings s("SimpleGDrive", "Files");
     s.setIniCodec("UTF-8");
     int totalSize=0;
     QStringList FilesInFOldersList = s.value("filesInFolders").toStringList();
@@ -155,6 +155,6 @@ void FormFolders::countTotalDriveSpace(){
         totalSize+=s.value("fileSize").toInt();
         s.endGroup();
     }
-    QSettings generalSettings("SimpleDrive", "General");
+    QSettings generalSettings("SimpleGDrive", "General");
     generalSettings.setValue("totalSize", totalSize);
 }

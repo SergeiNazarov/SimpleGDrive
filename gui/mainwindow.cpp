@@ -12,6 +12,7 @@
 #include <QFileDialog>
 #include <QProcess>
 #include <QThread>
+#include <QCryptographicHash>
 
 
 // TODO: Make check for drive folder.
@@ -37,6 +38,16 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->logoutButton, SIGNAL(clicked()), this, SLOT(logout()));
 
      ui->statusBar->showMessage(tr("Ready"));
+
+     QFile file("/home/s/Drive/test.deb");
+
+     if (file.open(QIODevice::ReadOnly)) {
+     QByteArray fileData = file.readAll();
+     QByteArray hashData = QCryptographicHash::hash(fileData, QCryptographicHash::Md5);
+
+     qWarning() << hashData.toHex();
+     }
+
 }
 
 MainWindow::~MainWindow()
@@ -45,17 +56,17 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::setSettings(){
-    QSettings s("SimpleDrive", "General");
+    QSettings s("SimpleGDrive", "General");
     ui->LogedAs->setText("You logged in as:\t"+s.value("email").toString());
     ui->rootDirectory->setText(s.value("rootDir").toString());
     QTimer::singleShot(120000, this, SLOT(setSettings()));
 }
 
 void MainWindow::setFilesTree(){
-    QSettings generalSettings("SimpleDrive", "General");
+    QSettings generalSettings("SimpleGDrive", "General");
     if(generalSettings.value("listFormed").toBool()){
         FormListOfFiles flof(ui->treeWidget);
-        QSettings s("SimpleDrive", "Files");
+        QSettings s("SimpleGDrive", "Files");
         s.setIniCodec("UTF-8");
         QStringList rootFolders = s.value("Folders").toStringList();
         QStringList rootFiles = s.value("Files").toStringList();
@@ -89,7 +100,7 @@ void MainWindow::on_actionForm_files_list_triggered()
 
 void MainWindow::on_actionDownload_all_files_triggered()
 {
-    QSettings s("SimpleDrive", "General");
+    QSettings s("SimpleGDrive", "General");
     FormFolders *d = new FormFolders(ui->statusBar, ui->progressBar);
     d->makeRootFolder(s.value("rootDir").toString()); // TODO: Refactor that fucntions parameters
 
@@ -99,13 +110,13 @@ void MainWindow::on_chooseDirButton_clicked()
 {
     QString rootdir = QFileDialog::getExistingDirectory(this, tr("Open Directory"), "", QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
     ui->rootDirectory->setText(rootdir);
-    QSettings s("SimpleDrive", "General");
+    QSettings s("SimpleGDrive", "General");
     s.setValue("rootDir", rootdir);
 }
 
 void MainWindow::logout(){
 //     FIXME: It's just restarting application. Not logging out. I think i need another way to do it.
-    QSettings s("SimpleDrive", "General");
+    QSettings s("SimpleGDrive", "General");
     s.remove("access_token");
     s.remove("refresh_token");
 

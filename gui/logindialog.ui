@@ -15,7 +15,7 @@
   </property>
   <property name="windowIcon">
    <iconset resource="mainResource.qrc">
-    <normaloff>:/logo/SImpleDriveLogo</normaloff>:/logo/SImpleDriveLogo</iconset>
+    <normaloff>:/logo/SimpleGDriveLogo</normaloff>:/logo/SimpleGDriveLogo</iconset>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout">
    <item>

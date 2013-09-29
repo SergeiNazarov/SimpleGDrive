@@ -11,7 +11,7 @@ DownloadFile::DownloadFile(QString filename, QUrl url, QProgressBar *bar, QObjec
     url(url)
 {
     flag_for_waiting=true;
-    QSettings s("SimpleDrive", "General");
+    QSettings s("SimpleGDrive", "General");
     totalSize = s.value("totalSize").toInt();
     access_token = s.value("access_token").toString();
     pNetworkAccessManager_download_file = new QNetworkAccessManager(this);

@@ -9,12 +9,10 @@ FormListOfFiles::FormListOfFiles(QTreeWidget *tw, QObject *parent) :
     treeWidget(tw)
 {
     treeWidget->clear();
-    QSettings settings("SimpleDrive", "General");
+    QSettings settings("SimpleGDrive", "General");
     access_token=settings.value("access_token").toString();
-    pNetworkAccessManager = new QNetworkAccessManager(this);
-    connect(pNetworkAccessManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(getReply(QNetworkReply*)));
-    NetworkAccessManager = new QNetworkAccessManager(this);
-    connect(NetworkAccessManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(getReply(QNetworkReply*)));
+    networkAccessManager = new QNetworkAccessManager(this);
+    connect(networkAccessManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(getReply(QNetworkReply*)));
     isRoot=true;
 }
 
@@ -29,7 +27,7 @@ void FormListOfFiles::getList(QString folderId){
     QNetworkRequest request;
     request.setUrl(url);
     request.setRawHeader("Authorization", QString("Bearer %1").arg(access_token).toLatin1());
-    NetworkAccessManager->get(request);
+    networkAccessManager->get(request);
 }
 
 
@@ -47,11 +45,11 @@ void FormListOfFiles::getReply(QNetworkReply *reply){
 }
 
 void FormListOfFiles::formRootList(QString json){
-    Settings = new QSettings("SimpleDrive", "Files");
+    Settings = new QSettings("SimpleGDrive", "Files");
     Settings->setIniCodec("UTF-8");
     Settings->clear();
     QStringList FoldersList, FilesList;
-    QSettings generalSettings("SimpleDrive", "General");
+    QSettings generalSettings("SimpleGDrive", "General");
     QString rootPath = generalSettings.value("rootDir").toString();
     //        Settings->setIniCodec("UTF-8");
     QJsonDocument jd = QJsonDocument::fromJson(json.toUtf8());
@@ -102,7 +100,7 @@ void FormListOfFiles::formRootList(QString json){
 
 
 void FormListOfFiles::formList(QString json){
-    QSettings s("SimpleDrive", "Files");
+    QSettings s("SimpleGDrive", "Files");
     s.setIniCodec("UTF-8");
     QJsonDocument jd = QJsonDocument::fromJson(json.toUtf8());
     QJsonObject globalObject = jd.object();

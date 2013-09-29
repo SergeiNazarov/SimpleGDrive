@@ -52,7 +52,7 @@ void Authorization::getToken(QNetworkReply *reply){
     refresh_token = sett2.value(QString("refresh_token")).toString();
     access_token = sett2.value(QString("access_token")).toString();
 
-    QSettings settings("SimpleDrive", "General");
+    QSettings settings("SimpleGDrive", "General");
     settings.setValue("access_token", access_token);
     settings.setValue("refresh_token", refresh_token);
 
@@ -66,7 +66,7 @@ void Authorization::refreshToken(){
     request.setUrl(url);
     request.setRawHeader("Content-Type", "application/x-www-form-urlencoded");
 
-    QSettings settings("SimpleDrive", "General");
+    QSettings settings("SimpleGDrive", "General");
     refresh_token=settings.value("refresh_token").toString();
 
     QString str = "client_secret=" + client_secret;
@@ -83,12 +83,12 @@ void Authorization::getRefreshToken(QNetworkReply *reply){
     QJsonDocument sd = QJsonDocument::fromJson(json.toUtf8());
     QJsonObject sett2 = sd.object();
     access_token = sett2.value(QString("access_token")).toString();
-    QSettings settings("SimpleDrive", "General");
+    QSettings settings("SimpleGDrive", "General");
     settings.setValue("access_token", access_token);
 }
 
 void Authorization::email(){
-    QSettings settings("SimpleDrive", "General");
+    QSettings settings("SimpleGDrive", "General");
     access_token=settings.value("access_token").toString();
     QUrl url("https://www.googleapis.com/oauth2/v2/userinfo");
     QNetworkRequest request;
@@ -101,7 +101,7 @@ void Authorization::getEmail(QNetworkReply *reply){
     QString json = reply->readAll();
     QJsonDocument jsonDoc = QJsonDocument::fromJson(json.toUtf8());
     QJsonObject sett2 = jsonDoc.object();
-    QSettings s("SimpleDrive", "General");
+    QSettings s("SimpleGDrive", "General");
     s.setValue("email", sett2["email"].toString());
 
 }
