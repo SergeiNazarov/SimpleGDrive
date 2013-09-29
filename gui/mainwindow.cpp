@@ -5,10 +5,13 @@
 #include "network/downloadfile.h"
 #include "filesystem/formfolders.h"
 
+#include "network/multipartupload.h"
+
 #include <QDir>
 #include <QTimer>
 #include <QFileDialog>
 #include <QProcess>
+#include <QThread>
 
 
 // TODO: Make check for drive folder.
@@ -20,6 +23,9 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+//    MultipartUpload *mu = new MultipartUpload();
+//    mu->startUpload("/home/s/test.deb");
+
     setSettings();
     setFilesTree();
 
@@ -29,6 +35,8 @@ MainWindow::MainWindow(QWidget *parent) :
     timer->start(3500000);
 
     connect(ui->logoutButton, SIGNAL(clicked()), this, SLOT(logout()));
+
+     ui->statusBar->showMessage(tr("Ready"));
 }
 
 MainWindow::~MainWindow()
@@ -48,9 +56,9 @@ void MainWindow::setFilesTree(){
     if(generalSettings.value("listFormed").toBool()){
         FormListOfFiles flof(ui->treeWidget);
         QSettings s("SimpleDrive", "Files");
-            s.setIniCodec("UTF-8");
-        QStringList rootFolders = s.value("rootFolders").toStringList();
-        QStringList rootFiles = s.value("rootFiles").toStringList();
+        s.setIniCodec("UTF-8");
+        QStringList rootFolders = s.value("Folders").toStringList();
+        QStringList rootFiles = s.value("Files").toStringList();
         for(auto iter = rootFolders.begin();iter!=rootFolders.end();iter++){
             flof.addRootQTreeWidgetItem(*iter,&s, generalSettings.value("rootDir").toString());
         }
@@ -72,21 +80,17 @@ void MainWindow::refreshToken()
 
 void MainWindow::on_actionForm_files_list_triggered()
 {
+
     FormListOfFiles *flof = new FormListOfFiles(ui->treeWidget);
-    flof->getFullList();
-    connect(flof, SIGNAL(fullListFormed(FormListOfFiles*)), this, SLOT(formRootList(FormListOfFiles*)));
+    flof->startObtaining();
 }
 
-void MainWindow::formRootList(FormListOfFiles *flof)
-{
-    flof->getRootList();
-}
 
 
 void MainWindow::on_actionDownload_all_files_triggered()
 {
     QSettings s("SimpleDrive", "General");
-    FormFolders *d = new FormFolders();
+    FormFolders *d = new FormFolders(ui->statusBar, ui->progressBar);
     d->makeRootFolder(s.value("rootDir").toString()); // TODO: Refactor that fucntions parameters
 
 }

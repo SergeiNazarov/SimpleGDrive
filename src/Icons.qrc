@@ -15,5 +15,6 @@
         <file>icons/icon_11_shared_collection_list.png</file>
         <file>icons/icon_11_spreadsheet_list.png</file>
         <file>icons/icon_11_video_list.png</file>
+        <file>icons/icon_10_text_list.png</file>
     </qresource>
 </RCC>

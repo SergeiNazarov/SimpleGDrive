@@ -9,19 +9,13 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>750</width>
+    <width>700</width>
     <height>600</height>
    </rect>
   </property>
-  <property name="minimumSize">
-   <size>
-    <width>750</width>
-    <height>600</height>
-   </size>
-  </property>
   <property name="maximumSize">
    <size>
-    <width>750</width>
+    <width>700</width>
     <height>600</height>
    </size>
   </property>
@@ -60,139 +54,159 @@
    <property name="acceptDrops">
     <bool>true</bool>
    </property>
-   <widget class="QTabWidget" name="tabWidget">
-    <property name="geometry">
-     <rect>
-      <x>230</x>
-      <y>10</y>
-      <width>511</width>
-      <height>511</height>
-     </rect>
-    </property>
-    <property name="currentIndex">
-     <number>0</number>
-    </property>
-    <widget class="QWidget" name="Sync">
-     <attribute name="title">
-      <string>Sync</string>
-     </attribute>
-     <layout class="QVBoxLayout" name="verticalLayout">
-      <item>
-       <widget class="QLabel" name="labelListOfFIles">
-        <property name="text">
-         <string>List of fIles</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QTreeWidget" name="treeWidget">
-        <column>
-         <property name="text">
-          <string>Title</string>
-         </property>
-        </column>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-    <widget class="QWidget" name="Settings">
-     <attribute name="title">
-      <string>Settings</string>
-     </attribute>
-     <widget class="QWidget" name="gridLayoutWidget">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>60</y>
-        <width>411</width>
-        <height>51</height>
-       </rect>
+   <layout class="QVBoxLayout" name="verticalLayout_2">
+    <item>
+     <widget class="QTabWidget" name="tabWidget">
+      <property name="currentIndex">
+       <number>0</number>
       </property>
-      <layout class="QGridLayout" name="RootDirLayout">
-       <property name="leftMargin">
-        <number>0</number>
-       </property>
-       <item row="1" column="0">
-        <widget class="QLineEdit" name="rootDirectory">
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="0">
-        <widget class="QLabel" name="rootDirLabel">
-         <property name="text">
-          <string>Root directory:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <widget class="QPushButton" name="chooseDirButton">
-         <property name="text">
-          <string>Open folder</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
+      <widget class="QWidget" name="Sync">
+       <attribute name="title">
+        <string>Sync</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="QLabel" name="labelListOfFIles">
+          <property name="text">
+           <string>List of fIles</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QTreeWidget" name="treeWidget">
+          <column>
+           <property name="text">
+            <string>Title</string>
+           </property>
+          </column>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="Settings">
+       <attribute name="title">
+        <string>Settings</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
+         <layout class="QGridLayout" name="gridLayout" columnstretch="10,0">
+          <property name="leftMargin">
+           <number>5</number>
+          </property>
+          <item row="0" column="0">
+           <widget class="QLabel" name="LogedAs">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>161</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>You logged in as: </string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QPushButton" name="logoutButton">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Logout</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QGridLayout" name="RootDirLayout">
+          <property name="sizeConstraint">
+           <enum>QLayout::SetMinAndMaxSize</enum>
+          </property>
+          <property name="leftMargin">
+           <number>5</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <property name="verticalSpacing">
+           <number>6</number>
+          </property>
+          <item row="1" column="0">
+           <widget class="QLineEdit" name="rootDirectory">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="rootDirLabel">
+            <property name="text">
+             <string>Root directory:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QPushButton" name="chooseDirButton">
+            <property name="text">
+             <string>Open folder</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="About">
+       <attribute name="title">
+        <string>About</string>
+       </attribute>
+      </widget>
      </widget>
-     <widget class="QWidget" name="gridLayoutWidget_2">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>10</y>
-        <width>411</width>
-        <height>31</height>
-       </rect>
+    </item>
+    <item>
+     <widget class="QProgressBar" name="progressBar">
+      <property name="value">
+       <number>24</number>
       </property>
-      <layout class="QGridLayout" name="gridLayout" columnstretch="10,0">
-       <item row="0" column="0">
-        <widget class="QLabel" name="LogedAs">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>161</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>You logged as: </string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="1">
-        <widget class="QPushButton" name="logoutButton">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="text">
-          <string>Logout</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
      </widget>
-    </widget>
-    <widget class="QWidget" name="About">
-     <attribute name="title">
-      <string>About</string>
-     </attribute>
-    </widget>
-   </widget>
+    </item>
+   </layout>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>750</width>
+     <width>700</width>
      <height>20</height>
     </rect>
    </property>

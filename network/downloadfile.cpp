@@ -1,45 +1,62 @@
 #include "downloadfile.h"
+#include <QDebug>
+#include <QThread>
 
-DownloadFile::DownloadFile(QObject *parent) :
-    QObject(parent)
+// TODO: Make progressBar working
+
+DownloadFile::DownloadFile(QString filename, QUrl url, QProgressBar *bar, QObject *parent) :
+    QObject(parent),
+    progressBar(bar),
+    filename(filename),
+    url(url)
 {
+    flag_for_waiting=true;
     QSettings s("SimpleDrive", "General");
+    totalSize = s.value("totalSize").toInt();
     access_token = s.value("access_token").toString();
     pNetworkAccessManager_download_file = new QNetworkAccessManager(this);
+    connect(this, SIGNAL(baton()), this, SLOT(setValue()));
 }
 
-void DownloadFile::startDownloadFile(QString filename, QUrl url){
+DownloadFile::~DownloadFile(){
+    delete pNetworkAccessManager_download_file;
+}
+
+void DownloadFile::startDownloadFile(){
     file.setFileName(filename);
-//    QUrl url(ui->lineEdit_2->text());
     QNetworkRequest request;
     request.setUrl(url);
     request.setRawHeader("Authorization", QString("Bearer %1").arg(access_token).toLatin1());
 
     file.open(QIODevice::WriteOnly);
 
-    rep = pNetworkAccessManager_download_file->get(request);
+    reply = pNetworkAccessManager_download_file->get(request);
 
-    connect(rep, SIGNAL(finished()), this, SLOT(downloadFinished()));
-    connect(rep, SIGNAL(readyRead()), this, SLOT(SaveFile()));
-    connect(rep, SIGNAL(downloadProgress(qint64,qint64)), this, SLOT(slotDownloadProgress(qint64,qint64)));
+    connect(reply, SIGNAL(finished()), this, SLOT(downloadFinished()));
+    connect(reply, SIGNAL(readyRead()), this, SLOT(SaveFile()));
+    connect(reply, SIGNAL(downloadProgress(qint64,qint64)), this, SLOT(slotDownloadProgress(qint64,qint64)));
 }
 
 void DownloadFile::SaveFile(){
 
-    file.write(rep->readAll());
-//    ui->textBrowser->setText(rep->readAll());
-//    ui->progressBar->show();
+    file.write(reply->readAll());
 }
 
 void DownloadFile::downloadFinished(){
     file.flush();
     file.close();
-//    ui->progressBar->hide();
+    emit baton();
+}
+
+void DownloadFile::setValue(){
+    flag_for_waiting=false;
 }
 
 void DownloadFile::slotDownloadProgress(qint64 bytesReceived, qint64 bytesTotal){
-
-//    ui->progressBar->setMaximum(bytesTotal);
-//    ui->progressBar->setValue(bytesReceived);
-
+    mute.lock();
+    progressBar->setMaximum(bytesTotal);
+//    qint64 temp = progressBar->value() + bytesReceived;
+//    emit curBytes(temp);
+    progressBar->setValue(bytesReceived);
+    mute.unlock();
 }

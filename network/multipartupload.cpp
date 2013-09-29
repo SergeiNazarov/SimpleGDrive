@@ -61,7 +61,12 @@ void MultipartUpload::startUpload(QString filename) {
 
 
     request.setRawHeader("Content-Length", QString::number(data.size()).toLatin1());
-    pNetworkAccessManager->post(request, data);
+    QNetworkReply *reply = pNetworkAccessManager->post(request, data);
+    connect(reply, SIGNAL(uploadProgress(qint64,qint64)), this, SLOT(uploadProgress(qint64,qint64)));
+}
+
+void MultipartUpload::uploadProgress(qint64 all, qint64 current){
+    qWarning()<<current<<"/"<<all;
 }
 
 void MultipartUpload::getRespond(QNetworkReply *reply){

@@ -33,9 +33,6 @@ private slots:
     void setSettings();
     void setFilesTree();
 
-    void formRootList(FormListOfFiles *flof);
-//    void formList(FormListOfFiles *flof);
-
     void on_actionForm_files_list_triggered();
 
     void on_actionDownload_all_files_triggered();

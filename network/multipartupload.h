@@ -25,6 +25,7 @@ public slots:
 
 private slots:
     void getRespond(QNetworkReply *);
+    void uploadProgress(qint64, qint64);
 
 private:
 
