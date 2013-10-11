@@ -1,28 +1,35 @@
 #include "formlistoffiles.h"
 #include "formfolders.h"
+
+
 #include <QStringList>
 #include <QDebug>
 
 
-FormListOfFiles::FormListOfFiles(QTreeWidget *tw, QObject *parent) :
+FormListOfFiles::FormListOfFiles(QTreeWidget *tw, QStatusBar *status, DataBase *db, QObject *parent) :
     QObject(parent),
-    treeWidget(tw)
+    treeWidget(tw),
+    statusBar(status),
+    db(db)
 {
-    treeWidget->clear();
-    QSettings settings("SimpleGDrive", "General");
-    access_token=settings.value("access_token").toString();
+    generalSettings = new QSettings("SimpleGDrive", "General");
+    access_token=generalSettings->value("access_token").toString();
     networkAccessManager = new QNetworkAccessManager(this);
     connect(networkAccessManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(getReply(QNetworkReply*)));
     isRoot=true;
+
+    connect(this,SIGNAL(readyToFillTreeWidget()),this,SLOT(setFilesTree()));
 }
 
 void FormListOfFiles::startObtaining(){
+    statusBar->showMessage("Obtaining list of files...");
     getList("root");
 }
 
 
 
 void FormListOfFiles::getList(QString folderId){
+    startedNetworkAccessManagers++;
     QUrl url(QString("https://www.googleapis.com/drive/v2/files?maxResults=10000&q='%1' in parents").arg(folderId));
     QNetworkRequest request;
     request.setUrl(url);
@@ -32,6 +39,7 @@ void FormListOfFiles::getList(QString folderId){
 
 
 void FormListOfFiles::getReply(QNetworkReply *reply){
+    finishedNetworkAccessManagers++;
     QString json = reply->readAll();
     if(isRoot){
         formRootList(json);
@@ -45,160 +53,146 @@ void FormListOfFiles::getReply(QNetworkReply *reply){
 }
 
 void FormListOfFiles::formRootList(QString json){
-    Settings = new QSettings("SimpleGDrive", "Files");
-    Settings->setIniCodec("UTF-8");
-    Settings->clear();
-    QStringList FoldersList, FilesList;
-    QSettings generalSettings("SimpleGDrive", "General");
-    QString rootPath = generalSettings.value("rootDir").toString();
-    //        Settings->setIniCodec("UTF-8");
+    QString rootPath = generalSettings->value("rootDir").toString();
     QJsonDocument jd = QJsonDocument::fromJson(json.toUtf8());
     QJsonObject globalObject = jd.object();
     QJsonArray arrayWithItems(globalObject["items"].toArray());
+
     for(auto iter = arrayWithItems.begin();iter!=arrayWithItems.end();  ++iter)
     {
+        Data temp;
         QJsonObject file = (*iter).toObject();
         QJsonObject labels_object = file["labels"].toObject();
 
         if(!labels_object["trashed"].toBool()){
-            Settings->beginGroup(file["id"].toString());
-            Settings->setValue("Path", rootPath);
-            Settings->setValue("title", file["title"].toString());
-            Settings->setValue("modifiedDate", file["modifiedDate"].toString());
-            Settings->setValue("icon", file["iconLink"].toString().mid(44));
+            temp.path=rootPath;
+            temp.isRoot=true;
+            temp.title=file["title"].toString();
+            temp.setDate(file["modifiedDate"].toString());
+            temp.setIcon(file["iconLink"].toString().mid(44));
             QJsonArray parents_array(file["parents"].toArray());
             QJsonObject parent_object = parents_array.first().toObject();
-            Settings->setValue("parentId", parent_object["id"].toString());
+            temp.parentId=parent_object["id"].toString();
             if(file["mimeType"].toString() == "application/vnd.google-apps.folder"){
-                Settings->setValue("folder",true);
-                FoldersList.push_back(file["id"].toString());
-                //                qWarning()<<file["title"].toString();
+                temp.isFolder=true;
                 getList(file["id"].toString());
             } else {
-                FilesList.push_back(file["id"].toString());
                 if(file["mimeType"].toString().contains("google")){
-                    Settings->setValue("downloadUrl", file["alternateLink"].toString());
-                    Settings->setValue("online", true);
+                    temp.downloadUrl=file["alternateLink"].toString();
+                    temp.isOnline=true;
                 } else {
-                    Settings->setValue("downloadUrl", file["downloadUrl"].toString());
+                    temp.downloadUrl=file["downloadUrl"].toString();
                 }
-                Settings->setValue("originalFilename", file["originalFilename"].toString());
-                Settings->setValue("fileExtension", file["fileExtension"].toString());
-                Settings->setValue("md5Checksum", file["md5Checksum"].toString());
-                Settings->setValue("fileSize", file["fileSize"].toString());
+                temp.originalName=file["originalFilename"].toString();
+                temp.fileExtension=file["fileExtension"].toString();
+                temp.md5Checksum=file["md5Checksum"].toString();
+                temp.fileSize=file["fileSize"].toString().toInt();
             }
-            Settings->endGroup();
-            addRootQTreeWidgetItem(file["id"].toString(), Settings, rootPath);
         }
+        db->dataBase.insert(file["id"].toString(),temp);
     }
-
-    if(!FoldersList.empty()) Settings->setValue("Folders", FoldersList);
-    if(!FilesList.empty()) Settings->setValue("Files", FilesList);
-
-    generalSettings.setValue("listFormed", true);
+    generalSettings->setValue("listFormed", true);
 }
 
 
 void FormListOfFiles::formList(QString json){
-    QSettings s("SimpleGDrive", "Files");
-    s.setIniCodec("UTF-8");
     QJsonDocument jd = QJsonDocument::fromJson(json.toUtf8());
     QJsonObject globalObject = jd.object();
     QJsonArray arrayWithItems(globalObject["items"].toArray());
     for(auto iter = arrayWithItems.begin();iter!=arrayWithItems.end();  ++iter)
     {
+        Data temp;
         QJsonObject file = (*iter).toObject();
         QJsonObject labels_object = file["labels"].toObject();
 
         if(!labels_object["trashed"].toBool()){
-            s.beginGroup(file["id"].toString());
-            mutex.lock();
-            filesInFolders.push_back(file["id"].toString());
-            mutex.unlock();
-            s.setValue("download", true);
-            s.setValue("title", file["title"].toString());
-            s.setValue("modifiedDate", file["modifiedDate"].toString());
-            s.setValue("icon", file["iconLink"].toString().mid(44));
+            temp.title=file["title"].toString();
+            temp.setDate(file["modifiedDate"].toString());
+            temp.setIcon(file["iconLink"].toString().mid(44));
             QJsonArray parents_array(file["parents"].toArray());
             QJsonObject parent_object = parents_array.first().toObject();
-            s.setValue("parentId", parent_object["id"].toString());
+            temp.parentId=parent_object["id"].toString();
             if(file["mimeType"].toString() == "application/vnd.google-apps.folder"){
-                s.setValue("folder",true);
+                temp.isFolder=true;
                 getList(file["id"].toString());
             } else {
                 if(file["mimeType"].toString().contains("google")){
-                    s.setValue("downloadUrl", file["alternateLink"].toString());
-                    s.setValue("online", true);
+                    temp.downloadUrl=file["alternateLink"].toString();
+                    temp.isOnline=true;
                 } else {
-                    s.setValue("downloadUrl", file["downloadUrl"].toString());
+                    temp.downloadUrl=file["downloadUrl"].toString();
                 }
-                s.setValue("originalFilename", file["originalFilename"].toString());
-                s.setValue("fileExtension", file["fileExtension"].toString());
-                s.setValue("md5Checksum", file["md5Checksum"].toString());
-                s.setValue("fileSize", file["fileSize"].toString());
+                temp.originalName=file["originalFilename"].toString();
+                temp.fileExtension=file["fileExtension"].toString();
+                temp.md5Checksum=file["md5Checksum"].toString();
+                temp.fileSize=file["fileSize"].toString().toInt();
             }
-            s.endGroup();
         }
+        mutex.lock();
+        db->dataBase.insert(file["id"].toString(),temp);
+        mutex.unlock();
     }
-
-    mutex.lock();
-    if(!filesInFolders.isEmpty()) s.setValue("filesInFolders", filesInFolders);
-    mutex.unlock();
+    if(startedNetworkAccessManagers==finishedNetworkAccessManagers){
+        emit readyToFillTreeWidget();
+    }
 }
 
-void FormListOfFiles::addRootQTreeWidgetItem(QString id, QSettings *s, QString path){
+void FormListOfFiles::addRootQTreeWidgetItem(QString id, QString path){
+    Data temp = db->dataBase.value(id);
     QString folderPath;
-    s->beginGroup(id);
-    bool is_folder = s->value("folder").toBool();
-    QString title = s->value("title").toString();
-    if(is_folder){
-        folderPath = path + "/" + title;
-    }
+    db->dataBase[id].filename=path + "/" + db->dataBase.value(id).title;
+    db->dataBase[id].isItExist();
 
-    s->setValue("filename", QString(path + "/" + title));
-
-    QIcon icon;
-    QFile file(QString(":/fileIcons/icons/%1").arg(s->value("icon").toString()));
-    if(file.exists()){
-        icon = QIcon(QString(":/fileIcons/icons/%1").arg(s->value("icon").toString()));
-    } else {
-        icon = QIcon(QString(":/fileIcons/icons/icon_10_generic_list.png"));
-    }
-    s->endGroup();
     QTreeWidgetItem *itm = new QTreeWidgetItem(treeWidget);
-    itm->setText(0, title);
-    itm->setIcon(0, icon);
+    itm->setText(0, db->dataBase.value(id).title);
+    itm->setIcon(0, db->dataBase.value(id).icon);
     treeWidget->addTopLevelItem(itm);
-    QStringList filesInFolders = s->value("filesInFolders").toStringList();
-    if(is_folder){
-        addChildQTreeWidgetItem(itm,id,s,filesInFolders, folderPath);
+    if(temp.isFolder){
+        folderPath = path + "/" + db->dataBase.value(id).title;
+        addChildQTreeWidgetItem(itm, id, folderPath);
     }
 }
 
-void FormListOfFiles::addChildQTreeWidgetItem(QTreeWidgetItem *parent, QString parentId, QSettings *s, QStringList filesInFolders, QString path){
+void FormListOfFiles::addChildQTreeWidgetItem(QTreeWidgetItem *parent, QString parentId, QString path){
     QString folderPath;
-    for(auto iter = filesInFolders.begin();iter!=filesInFolders.end();iter++){
-        s->beginGroup(*iter);
-        if(s->value("parentId").toString()==parentId){
-            bool is_folder = s->value("folder").toBool();
-            QString title = s->value("title").toString();
-            if(is_folder){
-                folderPath = path + "/" + title;
-            }
-            s->setValue("Path", path);
-            s->setValue("filename", QString(path + "/" + title));
-            QIcon icon(QString(":/fileIcons/icons/%1").arg(s->value("icon").toString()));
-            s->endGroup();
+    QMapIterator<QString, Data> i(db->dataBase);
+    while (i.hasNext()) {
+        i.next();
+        if(i.value().parentId==parentId){
+            Data temp=i.value();
+            temp.path=path;
+            temp.filename=path + "/" + i.value().title;
+            temp.isItExist();
+            db->dataBase.insert(i.key(), temp);
             QTreeWidgetItem *itm = new QTreeWidgetItem();
-            itm->setText(0, title);
-            itm->setIcon(0, icon);
+            itm->setText(0, i.value().title);
+            itm->setIcon(0, i.value().icon);
             parent->addChild(itm);
-            if(is_folder){
-                addChildQTreeWidgetItem(itm,*iter,s, filesInFolders, folderPath);
+            if(i.value().isFolder){
+                folderPath = path + "/" + i.value().title;
+                addChildQTreeWidgetItem(itm, i.key(), folderPath);
             }
-        } else {
-            s->endGroup();
         }
     }
 }
 
+void FormListOfFiles::setFilesTree(bool localCall){
+    treeWidget->clear();
+    QString rootPath = generalSettings->value("rootDir").toString();
+    QMapIterator<QString, Data> i(db->dataBase);
+    while (i.hasNext()) {
+        i.next();
+        if(i.value().path==rootPath){
+            addRootQTreeWidgetItem(i.key(), rootPath);
+        }
+    }
+    treeWidget->setSortingEnabled(true);
+    treeWidget->sortByColumn(0);
+
+    statusBar->showMessage("List of files obtained", 60);
+
+    if(localCall){
+        db->save();
+        qWarning("save");
+    }
+}

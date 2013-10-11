@@ -32,8 +32,8 @@
    <string>SimpleGDrive</string>
   </property>
   <property name="windowIcon">
-   <iconset>
-    <normaloff>:/logo/SimpleGDriveLogo</normaloff>:/logo/SimpleGDriveLogo</iconset>
+   <iconset resource="../src/mainResource.qrc">
+    <normaloff>:/logo/SImpleGDriveLogo.png</normaloff>:/logo/SImpleGDriveLogo.png</iconset>
   </property>
   <property name="iconSize">
    <size>
@@ -194,8 +194,11 @@
     </item>
     <item>
      <widget class="QProgressBar" name="progressBar">
+      <property name="minimum">
+       <number>0</number>
+      </property>
       <property name="value">
-       <number>24</number>
+       <number>100</number>
       </property>
      </widget>
     </item>
@@ -246,6 +249,8 @@
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources/>
+ <resources>
+  <include location="../src/mainResource.qrc"/>
+ </resources>
  <connections/>
 </ui>

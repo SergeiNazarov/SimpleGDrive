@@ -13,6 +13,11 @@
 #include <QProcess>
 #include <QThread>
 #include <QCryptographicHash>
+#include <QDateTime>
+#include <QFileInfo>
+
+
+#include <filesystem/data.h>
 
 
 // TODO: Make check for drive folder.
@@ -23,6 +28,31 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    db = new DataBase();
+    db->load();
+
+//    db->display();
+
+    generalSettings = new QSettings("SimpleGDrive", "General");
+
+
+    QString gDate1 = "1996-04-12T14:18:44.897Z";
+    QString gDate2 = "1996-04-12T14:18:44.000Z";
+//    qWarning()<<gDate.mid(0,4).toInt();
+
+    Data dat, dat2;
+    dat.setDate(gDate1);
+    dat2.setDate(gDate2);
+    if(dat.modifiedDate>dat2.modifiedDate)
+        qWarning("true");
+    else
+        qWarning("false");
+//    qWarning()<<dat.getDate();
+//    QFile file("/home/s/test.html");
+//    QFileInfo info(file);
+//    qWarning()<<info.lastModified().toString();
+//    qWarning()<<info.lastModified().toUTC().toString();
+
 
 //    MultipartUpload *mu = new MultipartUpload();
 //    mu->startUpload("/home/s/test.deb");
@@ -39,14 +69,14 @@ MainWindow::MainWindow(QWidget *parent) :
 
      ui->statusBar->showMessage(tr("Ready"));
 
-     QFile file("/home/s/Drive/test.deb");
+//     QFile file("/home/s/Drive/test.deb");
 
-     if (file.open(QIODevice::ReadOnly)) {
-     QByteArray fileData = file.readAll();
-     QByteArray hashData = QCryptographicHash::hash(fileData, QCryptographicHash::Md5);
+//     if (file.open(QIODevice::ReadOnly)) {
+//     QByteArray fileData = file.readAll();
+//     QByteArray hashData = QCryptographicHash::hash(fileData, QCryptographicHash::Md5);
 
-     qWarning() << hashData.toHex();
-     }
+//     qWarning() << hashData.toHex();
+//     }
 
 }
 
@@ -56,71 +86,50 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::setSettings(){
-    QSettings s("SimpleGDrive", "General");
-    ui->LogedAs->setText("You logged in as:\t"+s.value("email").toString());
-    ui->rootDirectory->setText(s.value("rootDir").toString());
-    QTimer::singleShot(120000, this, SLOT(setSettings()));
+    qWarning("setSettings");
+    ui->LogedAs->setText("You logged in as:\t"+generalSettings->value("email").toString());
+    ui->rootDirectory->setText(generalSettings->value("rootDir").toString());
+    if(!generalSettings->contains("refresh_token")) QTimer::singleShot(120000, this, SLOT(setSettings()));
 }
 
 void MainWindow::setFilesTree(){
-    QSettings generalSettings("SimpleGDrive", "General");
-    if(generalSettings.value("listFormed").toBool()){
-        FormListOfFiles flof(ui->treeWidget);
-        QSettings s("SimpleGDrive", "Files");
-        s.setIniCodec("UTF-8");
-        QStringList rootFolders = s.value("Folders").toStringList();
-        QStringList rootFiles = s.value("Files").toStringList();
-        for(auto iter = rootFolders.begin();iter!=rootFolders.end();iter++){
-            flof.addRootQTreeWidgetItem(*iter,&s, generalSettings.value("rootDir").toString());
-        }
-        for(auto iter = rootFiles.begin();iter!=rootFiles.end();iter++){
-            flof.addRootQTreeWidgetItem(*iter,&s, generalSettings.value("rootDir").toString());
-        }
-        ui->treeWidget->setSortingEnabled(true);
-        ui->treeWidget->sortByColumn(0);
+    if(generalSettings->value("listFormed").toBool()){
+        FormListOfFiles *flof = new FormListOfFiles(ui->treeWidget, ui->statusBar, db);
+        flof->setFilesTree(false);
     }
 }
 
 void MainWindow::refreshToken()
 {
-    qWarning("refresh");
+    qWarning("refresh token");
     Authorization *auth = new Authorization();
     auth->refreshToken();
 }
 
-
 void MainWindow::on_actionForm_files_list_triggered()
 {
-
-    FormListOfFiles *flof = new FormListOfFiles(ui->treeWidget);
+    FormListOfFiles *flof = new FormListOfFiles(ui->treeWidget, ui->statusBar, db);
     flof->startObtaining();
 }
 
-
-
 void MainWindow::on_actionDownload_all_files_triggered()
 {
-    QSettings s("SimpleGDrive", "General");
-    FormFolders *d = new FormFolders(ui->statusBar, ui->progressBar);
-    d->makeRootFolder(s.value("rootDir").toString()); // TODO: Refactor that fucntions parameters
-
+    FormFolders *d = new FormFolders(db, ui->statusBar, ui->progressBar);
+    d->makeRootFolder(generalSettings->value("rootDir").toString()); // TODO: Refactor that fucntions parameters
 }
 
 void MainWindow::on_chooseDirButton_clicked()
 {
     QString rootdir = QFileDialog::getExistingDirectory(this, tr("Open Directory"), "", QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
     ui->rootDirectory->setText(rootdir);
-    QSettings s("SimpleGDrive", "General");
-    s.setValue("rootDir", rootdir);
+    generalSettings->setValue("rootDir", rootdir);
 }
 
 void MainWindow::logout(){
 //     FIXME: It's just restarting application. Not logging out. I think i need another way to do it.
-    QSettings s("SimpleGDrive", "General");
-    s.remove("access_token");
-    s.remove("refresh_token");
+    generalSettings->remove("access_token");
+    generalSettings->remove("refresh_token");
 
     QProcess::startDetached(QApplication::applicationFilePath());
     exit(12);
-
 }

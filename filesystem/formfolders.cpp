@@ -8,101 +8,87 @@
 #include <QThread>
 
 
-FormFolders::FormFolders(QStatusBar *status, QProgressBar *bar, QObject *parent) :
+FormFolders::FormFolders(DataBase *db, QStatusBar *status, QProgressBar *bar, QObject *parent) :
     QObject(parent),
     progressBar(bar),
-    statusBar(status)
+    statusBar(status),
+    db(db)
 {
     QSettings settings("SimpleGDrive", "General");
     access_token=settings.value("access_token").toString();
-    numberOfFiles=0;
     n=0;
-    countTotalDriveSpace();
+    this->db->countAllFiles();
+    this->db->verifyExisting();
+    this->db->countDownloadedFiles();
+    progressBar->setMaximum(this->db->filesQuantity);
+    progressBar->setValue(this->db->downloadedFiles);
+    progressBar->setTextVisible(true);
+
+    QString text(QString("%1/%2").arg(this->db->downloadedFiles).arg(this->db->filesQuantity));
+    progressBar->setFormat(text);
 }
 
 void FormFolders::makeRootFolder(QString rootDir){
     QDir dir;
     dir.cd(rootDir);
 
-    QSettings s("SimpleGDrive", "Files");
-    s.setIniCodec("UTF-8");
-    QStringList rootFilesList = s.value("Files").toStringList();
-    for(auto iter = rootFilesList.begin();iter!=rootFilesList.end();iter++){
-        s.beginGroup(*iter);
-        QString filename =dir.absolutePath()+"/"+s.value("title").toString();
-        if(s.value("online").toBool()){
-            linkingOnlineFiles(filename, s.value("downloadUrl").toString(), s.value("title").toString());
-        } else {
-            downloadFile(filename, QUrl(s.value("downloadUrl").toString()));
-            qWarning()<<"downloading"<<filename;
+    QMap<QString, Data>::const_iterator folder = db->dataBase.constBegin();
+    while (folder != db->dataBase.constEnd()) {
+        if(folder.value().isFolder){
+            dir.mkpath(folder.value().filename);
         }
-        s.endGroup();
+        folder++;
     }
-    QStringList rootFoldersList = s.value("Folders").toStringList();
-    for(auto iter = rootFoldersList.begin();iter!=rootFoldersList.end();iter++){
-        s.beginGroup(*iter);
-        dir.mkdir(s.value("title").toString());
-        QDir localDir(dir.absolutePath()+"/"+s.value("title").toString());
-        makeOtherFolders(*iter, localDir);
-        s.endGroup();
+
+    QMap<QString, Data>::const_iterator file = db->dataBase.constBegin();
+    while (file != db->dataBase.constEnd()) {
+        if(!file.value().isFolder){
+            if(file.value().isOnline){
+                linkingOnlineFiles(file.value().filename, file.value().downloadUrl, file.value().title);
+            } else {
+                if(!file.value().exist){
+                    downloadFile(file.value().filename, QUrl(file.value().downloadUrl));
+                } else {
+//                        qWarning()<<file.value().filename<<"exist";
+                }
+            }
+        }
+        file++;
     }
+
     statusBar->showMessage("Finished", 3000);
 
 }
 
-void FormFolders::makeOtherFolders(QString parentId, QDir currentDir){
-    QSettings s("SimpleGDrive", "Files");
-    s.setIniCodec("UTF-8");
-    QStringList FilesList = s.value("filesInFolders").toStringList();
-    for(auto iter = FilesList.begin();iter!=FilesList.end();iter++){
-        s.beginGroup(*iter);
-        if(s.value("parentId").toString() == parentId){
-            if(s.value("folder").toBool()){
-                currentDir.mkdir(s.value("title").toString());
-                QDir localDir(currentDir.absolutePath()+"/"+s.value("title").toString());
-                makeOtherFolders(*iter, localDir);
-            } else {
-                QString filename = currentDir.absolutePath()+"/"+s.value("title").toString();
-                if(s.value("online").toBool()){
-                    linkingOnlineFiles(filename, s.value("downloadUrl").toString(), s.value("title").toString());
-                } else {
-                    if(!QFile(filename).exists()){
-                        downloadFile(filename, QUrl(s.value("downloadUrl").toString()));
-                    } else {
-//                        qWarning()<<filename<<"exist";
-                    }
-                }
-            }
-        }
-        s.endGroup();
-    }
-}
 
 void FormFolders::downloadFile(QString filename, QUrl url){
+    if(filename.isEmpty()) return;
     int counter=0;
-    statusBar->showMessage(QString("Downloading "+filename));
     QThread t;
     qWarning()<<" "<<++n<<" "<<filename;
-    DownloadFile *df = new DownloadFile(filename, url, progressBar);
+    DownloadFile *df = new DownloadFile(filename, url, statusBar);
     df->moveToThread(&t);
     t.start();
     connect(&t, SIGNAL(started()), df, SLOT(startDownloadFile()));
     while (df->flag_for_waiting) {
         delay(1);
         counter++;
-        if(counter>10 && !QFile(filename).exists()){
+        if(counter>10 && (!QFile(filename).exists() || QFile(filename).size()==0)){
             downloadFile(filename, url);
-            break;
+            t.quit();
+            while(!t.isFinished()){}
+            delete df;
+            return;
         }
     }
+    db->downloadedFiles++;
+    progressBar->setValue(db->downloadedFiles);
+    QString text(QString("%1/%2").arg(this->db->downloadedFiles).arg(this->db->filesQuantity));
+    progressBar->setFormat(text);
     t.quit();
     while(!t.isFinished()){}
 
     delete df;
-}
-
-void FormFolders::counter(){
-    --numberOfFiles;
 }
 
 void FormFolders::delay(int n)
@@ -136,25 +122,4 @@ void FormFolders::linkingOnlineFiles(QString filename, QString url, QString titl
     QTextStream out(&file);
     out << html;
     file.close();
-}
-
-
-void FormFolders::countTotalDriveSpace(){
-    QSettings s("SimpleGDrive", "Files");
-    s.setIniCodec("UTF-8");
-    int totalSize=0;
-    QStringList FilesInFOldersList = s.value("filesInFolders").toStringList();
-    for(auto iter = FilesInFOldersList.begin();iter!=FilesInFOldersList.end();iter++){
-        s.beginGroup(*iter);
-        totalSize+=s.value("fileSize").toInt();
-        s.endGroup();
-    }
-    QStringList FilesList = s.value("Files").toStringList();
-    for(auto iter = FilesList.begin();iter!=FilesList.end();iter++){
-        s.beginGroup(*iter);
-        totalSize+=s.value("fileSize").toInt();
-        s.endGroup();
-    }
-    QSettings generalSettings("SimpleGDrive", "General");
-    generalSettings.setValue("totalSize", totalSize);
 }

@@ -13,11 +13,14 @@
 #include <QProgressBar>
 #include <QStatusBar>
 
+#include "data.h"
+#include "database.h"
+
 class FormFolders : public QObject
 {
     Q_OBJECT
 public:
-    explicit FormFolders(QStatusBar *status=0 ,QProgressBar *bar=0, QObject *parent = 0);
+    explicit FormFolders(DataBase *db, QStatusBar *status=0 ,QProgressBar *bar=0, QObject *parent = 0);
     void makeRootFolder(QString rootDir);
 
 signals:
@@ -25,16 +28,13 @@ signals:
 public slots:
 
 private slots:
-    void counter();
 
 private:
     void delay(int n);
     void makeOtherFolders(QString parentId, QDir currentDir);
     void linkingOnlineFiles(QString filename, QString url, QString title);
     void downloadFile(QString filename, QUrl url);
-    void countTotalDriveSpace();
 
-    int numberOfFiles;
     int n;
 
     QProgressBar *progressBar;
@@ -43,6 +43,8 @@ private:
     QString access_token;
 
     QNetworkAccessManager *pNetworkAccessManager_get;
+
+    DataBase *db;
 };
 
 #endif // FORMFOLDERS_H

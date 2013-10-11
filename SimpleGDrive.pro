@@ -23,7 +23,9 @@ SOURCES += main.cpp\
     filesystem/formfolders.cpp \
     network/downloadfile.cpp \
     network/simpleupload.cpp \
-    network/multipartupload.cpp
+    network/multipartupload.cpp \
+    filesystem/data.cpp \
+    filesystem/database.cpp
 
 HEADERS  += gui/mainwindow.h \
     gui/logindialog.h \
@@ -34,7 +36,9 @@ HEADERS  += gui/mainwindow.h \
     filesystem/formfolders.h \
     network/downloadfile.h \
     network/simpleupload.h \
-    network/multipartupload.h
+    network/multipartupload.h \
+    filesystem/data.h \
+    filesystem/database.h
 
 FORMS    += gui/mainwindow.ui \
     gui/logindialog.ui

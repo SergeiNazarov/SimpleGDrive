@@ -1,21 +1,18 @@
 #include "downloadfile.h"
 #include <QDebug>
-#include <QThread>
 
-// TODO: Make progressBar working
-
-DownloadFile::DownloadFile(QString filename, QUrl url, QProgressBar *bar, QObject *parent) :
+DownloadFile::DownloadFile(QString filename, QUrl url, QStatusBar *bar, QObject *parent) :
     QObject(parent),
-    progressBar(bar),
+    statusBar(bar),
     filename(filename),
     url(url)
 {
     flag_for_waiting=true;
-    QSettings s("SimpleGDrive", "General");
-    totalSize = s.value("totalSize").toInt();
-    access_token = s.value("access_token").toString();
+    QSettings settings("SimpleGDrive", "General");
+    totalSize = settings.value("totalSize").toInt();
+    access_token = settings.value("access_token").toString();
     pNetworkAccessManager_download_file = new QNetworkAccessManager(this);
-    connect(this, SIGNAL(baton()), this, SLOT(setValue()));
+    statusBar->showMessage(QString("Downloading %1").arg(filename));
 }
 
 DownloadFile::~DownloadFile(){
@@ -45,18 +42,15 @@ void DownloadFile::SaveFile(){
 void DownloadFile::downloadFinished(){
     file.flush();
     file.close();
-    emit baton();
-}
-
-void DownloadFile::setValue(){
     flag_for_waiting=false;
 }
 
 void DownloadFile::slotDownloadProgress(qint64 bytesReceived, qint64 bytesTotal){
-    mute.lock();
-    progressBar->setMaximum(bytesTotal);
-//    qint64 temp = progressBar->value() + bytesReceived;
-//    emit curBytes(temp);
-    progressBar->setValue(bytesReceived);
-    mute.unlock();
+    if(bytesTotal>10485760){
+    int temp = (double)bytesReceived/bytesTotal*100;
+//    int toStatusBar = temp;
+    statusBar->clearMessage();
+    statusBar->showMessage(QString("Downloading %1 (%2%)").arg(filename).arg(temp));
+    }
 }
+

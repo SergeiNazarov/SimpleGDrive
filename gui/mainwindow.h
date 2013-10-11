@@ -11,7 +11,7 @@
 #include <QFile>
 
 #include "filesystem/formlistoffiles.h"
-
+#include "filesystem/database.h"
 
 namespace Ui {
 class MainWindow;
@@ -41,6 +41,9 @@ private slots:
     void logout();
 
 private:
+    QSettings *generalSettings;
+
+    DataBase *db;
 
     Ui::MainWindow *ui;
 

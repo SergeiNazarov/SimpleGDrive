@@ -6,7 +6,7 @@
 #include <QtNetwork/QNetworkRequest>
 #include <QtNetwork/QNetworkReply>
 #include <QFile>
-#include <QProgressBar>
+#include <QStatusBar>
 
 #include <QMutex>
 
@@ -15,9 +15,9 @@ class DownloadFile : public QObject
 {
     Q_OBJECT
 public:
-    explicit DownloadFile(QString filename, QUrl url,QProgressBar *bar = 0,QObject *parent = 0);
+    explicit DownloadFile(QString filename, QUrl url,QStatusBar *bar = 0,QObject *parent = 0);
     bool flag_for_waiting;
-    QProgressBar *progressBar;
+    QStatusBar *statusBar;
     ~DownloadFile();
 signals:
     void baton();
@@ -29,7 +29,6 @@ private slots:
     void SaveFile();
     void downloadFinished();
     void slotDownloadProgress(qint64,qint64);
-    void setValue();
     
 private:
     QMutex mute;
