@@ -1,6 +1,10 @@
-SimpleDrive
-===========
+SimpleGDrive
+============
 Qt based client for Google Drive.
+
+Disclaimer
+==========
+This isn't finished software. Use only at one's own risk.
 
 Requirements
 ============
