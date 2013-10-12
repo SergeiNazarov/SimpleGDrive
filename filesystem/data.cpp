@@ -18,20 +18,8 @@ void Data::isItExist(){
 
 
 void Data::setDate(QString gDate){
-    QDate date;
-    int year = gDate.mid(0,4).toInt();
-    int month = gDate.mid(5, 2).toInt();
-    int day = gDate.mid(8, 2).toInt();
-    date.setDate(year,month,day);
-    QTime time;
-    int hours = gDate.mid(11,2).toInt();
-    int minutes = gDate.mid(14,2).toInt();
-    int seconds = gDate.mid(17,2).toInt();
-    int miliseconds = gDate.mid(20,3).toInt();
-    time.setHMS(hours, minutes, seconds, miliseconds);
-    modifiedDate.setDate(date);
-    modifiedDate.setTime(time);
-//    qWarning()<<modifiedDate.toString();
+    modifiedDate = QDateTime::fromString(gDate, "yyyy-MM-ddThh:mm:ss.zzzZ");
+    modifiedDate.setTimeSpec(Qt::UTC);
 }
 
 
@@ -80,15 +68,3 @@ QDataStream& operator >> (QDataStream& in, Data& obj)
             >> obj.originalName >> obj.parentId >> obj.exist >> obj.modifiedDate >> obj.isOnline >> obj.isRoot;
     return in;
 }
-
-
-//bool Data::operator ==(const Data& d) const{
-//    if(this->downloadUrl==d.downloadUrl && this->exist==d.exist && this->fileExtension==d.fileExtension &&
-//            this->filename==d.filename && this->fileSize==d.fileSize && this->icon==d.icon && this->isFolder==d.isFolder &&
-//            this->md5Checksum==d.md5Checksum && this->modifiedDate==d.modifiedDate && this->online==d.online &&
-//            this->originalName==d.originalName && this->parentId==d.parentId && this->path==d.path && this->title==d.title)
-//        return true;
-//    else
-//        return false;
-
-//}

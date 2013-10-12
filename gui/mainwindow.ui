@@ -74,9 +74,20 @@
         </item>
         <item>
          <widget class="QTreeWidget" name="treeWidget">
+          <attribute name="headerDefaultSectionSize">
+           <number>500</number>
+          </attribute>
+          <attribute name="headerShowSortIndicator" stdset="0">
+           <bool>false</bool>
+          </attribute>
           <column>
            <property name="text">
             <string>Title</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Last modified</string>
            </property>
           </column>
          </widget>

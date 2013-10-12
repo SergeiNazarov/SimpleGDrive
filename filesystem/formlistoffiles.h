@@ -16,6 +16,28 @@
 #include "data.h"
 #include "database.h"
 
+class CustomTreeWidgetItem : public QTreeWidgetItem
+{
+public:
+    CustomTreeWidgetItem(QTreeWidget *tree) : QTreeWidgetItem(tree)  {}
+    CustomTreeWidgetItem(QTreeWidget * parent, const QStringList & strings)
+                   : QTreeWidgetItem (parent,strings)  {}
+    CustomTreeWidgetItem(){}
+    bool operator< (const QTreeWidgetItem &other) const
+    {
+        int column = treeWidget()->sortColumn();
+        if(column==1){
+            QDateTime first = QDateTime::fromString(text(column), "hh:mm yy-MM-dd");
+            QDateTime otherdate = QDateTime::fromString(other.text(column), "hh:mm yy-MM-dd");
+            return first < otherdate;
+        } else {
+            const QVariant v1 = data(column, Qt::DisplayRole);
+            const QVariant v2 = other.data(column, Qt::DisplayRole);
+            return v1.toString() < v2.toString();
+        }
+    }
+
+};
 
 class FormListOfFiles : public QObject
 {
@@ -38,7 +60,7 @@ private slots:
 
 private:
     void getList(QString folderId);
-    void addChildQTreeWidgetItem(QTreeWidgetItem *parent, QString parentId, QString path);
+    void addChildQTreeWidgetItem(CustomTreeWidgetItem *parent, QString parentId, QString path);
 
     void formRootList(QString json);
     void formList(QString json);
@@ -66,5 +88,6 @@ private:
     bool isRoot;
     
 };
+
 
 #endif // FORMLISTOFFILES_H

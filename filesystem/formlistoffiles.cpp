@@ -26,8 +26,6 @@ void FormListOfFiles::startObtaining(){
     getList("root");
 }
 
-
-
 void FormListOfFiles::getList(QString folderId){
     startedNetworkAccessManagers++;
     QUrl url(QString("https://www.googleapis.com/drive/v2/files?maxResults=10000&q='%1' in parents").arg(folderId));
@@ -36,7 +34,6 @@ void FormListOfFiles::getList(QString folderId){
     request.setRawHeader("Authorization", QString("Bearer %1").arg(access_token).toLatin1());
     networkAccessManager->get(request);
 }
-
 
 void FormListOfFiles::getReply(QNetworkReply *reply){
     finishedNetworkAccessManagers++;
@@ -143,9 +140,10 @@ void FormListOfFiles::addRootQTreeWidgetItem(QString id, QString path){
     db->dataBase[id].filename=path + "/" + db->dataBase.value(id).title;
     db->dataBase[id].isItExist();
 
-    QTreeWidgetItem *itm = new QTreeWidgetItem(treeWidget);
+    CustomTreeWidgetItem *itm = new CustomTreeWidgetItem(treeWidget);
     itm->setText(0, db->dataBase.value(id).title);
     itm->setIcon(0, db->dataBase.value(id).icon);
+    itm->setData(1, Qt::DisplayRole, db->dataBase.value(id).modifiedDate.toLocalTime().toString("hh:mm yy-MM-dd"));
     treeWidget->addTopLevelItem(itm);
     if(temp.isFolder){
         folderPath = path + "/" + db->dataBase.value(id).title;
@@ -153,7 +151,7 @@ void FormListOfFiles::addRootQTreeWidgetItem(QString id, QString path){
     }
 }
 
-void FormListOfFiles::addChildQTreeWidgetItem(QTreeWidgetItem *parent, QString parentId, QString path){
+void FormListOfFiles::addChildQTreeWidgetItem(CustomTreeWidgetItem *parent, QString parentId, QString path){
     QString folderPath;
     QMapIterator<QString, Data> i(db->dataBase);
     while (i.hasNext()) {
@@ -164,9 +162,10 @@ void FormListOfFiles::addChildQTreeWidgetItem(QTreeWidgetItem *parent, QString p
             temp.filename=path + "/" + i.value().title;
             temp.isItExist();
             db->dataBase.insert(i.key(), temp);
-            QTreeWidgetItem *itm = new QTreeWidgetItem();
+            CustomTreeWidgetItem *itm = new CustomTreeWidgetItem();
             itm->setText(0, i.value().title);
             itm->setIcon(0, i.value().icon);
+            itm->setData(1, Qt::DisplayRole, i.value().modifiedDate.toLocalTime().toString("hh:mm yy-MM-dd"));
             parent->addChild(itm);
             if(i.value().isFolder){
                 folderPath = path + "/" + i.value().title;
@@ -187,7 +186,7 @@ void FormListOfFiles::setFilesTree(bool localCall){
         }
     }
     treeWidget->setSortingEnabled(true);
-    treeWidget->sortByColumn(0);
+    treeWidget->sortByColumn(1);
 
     statusBar->showMessage("List of files obtained", 60);
 
