@@ -4,7 +4,13 @@ Qt based client for Google Drive.
 
 Disclaimer
 ==========
-This isn't finished software. Use only at one's own risk.
+This isn't finished software. Use only at one's own risk. Developing is going under Ubuntu Linux, so I know nothing about
+operability under other operating systems.
+
+Facilities
+==========
+At that moment programm is supporting synchronization "Drive to local folder". Also it has simple GUI which is displaying files
+tree with last modified dates. Full synchronization support is coming.
 
 Requirements
 ============
