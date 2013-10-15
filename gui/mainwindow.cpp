@@ -35,30 +35,11 @@ MainWindow::MainWindow(QWidget *parent) :
 
     generalSettings = new QSettings("SimpleGDrive", "General");
 
-
-    QString gDate1 = "1996-04-12T14:18:44.897Z";
-    QString gDate2 = "1996-04-12T14:18:44.000Z";
-//    qWarning()<<gDate.mid(0,4).toInt();
-
-    Data dat, dat2;
-    dat.setDate(gDate1);
-    dat2.setDate(gDate2);
-    if(dat.modifiedDate>dat2.modifiedDate)
-        qWarning("true");
-    else
-        qWarning("false");
-//    qWarning()<<dat.getDate();
-//    QFile file("/home/s/test.html");
-//    QFileInfo info(file);
-//    qWarning()<<info.lastModified().toString();
-//    qWarning()<<info.lastModified().toUTC().toString();
-
-
 //    MultipartUpload *mu = new MultipartUpload();
 //    mu->startUpload("/home/s/test.deb");
 
     setSettings();
-    setFilesTree();
+    setUI();
 
     refreshToken();
     QTimer *timer = new QTimer(this);
@@ -68,15 +49,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->logoutButton, SIGNAL(clicked()), this, SLOT(logout()));
 
      ui->statusBar->showMessage(tr("Ready"));
-
-//     QFile file("/home/s/Drive/test.deb");
-
-//     if (file.open(QIODevice::ReadOnly)) {
-//     QByteArray fileData = file.readAll();
-//     QByteArray hashData = QCryptographicHash::hash(fileData, QCryptographicHash::Md5);
-
-//     qWarning() << hashData.toHex();
-//     }
 
 }
 
@@ -92,7 +64,12 @@ void MainWindow::setSettings(){
     if(!generalSettings->contains("refresh_token")) QTimer::singleShot(120000, this, SLOT(setSettings()));
 }
 
-void MainWindow::setFilesTree(){
+void MainWindow::setUI(){
+    if(db->filesQuantity!=0)
+        ui->progressBar->setValue((db->downloadedFiles)/(db->filesQuantity)*100);
+    else
+        ui->progressBar->setValue(0);
+
     if(generalSettings->value("listFormed").toBool()){
         FormListOfFiles *flof = new FormListOfFiles(ui->treeWidget, ui->statusBar, db);
         flof->setFilesTree(false);

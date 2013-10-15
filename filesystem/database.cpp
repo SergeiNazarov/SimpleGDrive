@@ -1,5 +1,7 @@
 #include "database.h"
 
+#include <QDebug>
+
 DataBase::DataBase()
 {
 
@@ -8,7 +10,7 @@ DataBase::DataBase()
 void DataBase::countDownloadedFiles(){
     downloadedFiles=0;
     foreach (Data data, dataBase) {
-        if(data.exist){
+        if(data.exist && !data.isFolder && !data.isOnline){
             downloadedFiles++;
         }
     }
@@ -45,7 +47,7 @@ void DataBase::display(){
 }
 
 void DataBase::save(){
-    QSettings settings("SimpleGDrive", "Test");
+    QSettings settings("SimpleGDrive", "Files");
     settings.clear();
     QVariant variant;
     variant.setValue(QVariant::fromValue<DataBase>(*this));
@@ -53,10 +55,16 @@ void DataBase::save(){
 }
 
 void DataBase::load(){
-    QSettings settings("SimpleGDrive", "Test");
+    QSettings settings("SimpleGDrive", "Files");
     *this = settings.value("Data").value<DataBase>();
 }
 
+void DataBase::clear(){
+    downloadedFiles=0;
+    filesQuantity=0;
+    driveSize=0;
+    dataBase.clear();
+}
 
 QDataStream& operator << (QDataStream& out, const DataBase& obj){
     out << obj.dataBase << obj.downloadedFiles << obj.filesQuantity << obj.driveSize;

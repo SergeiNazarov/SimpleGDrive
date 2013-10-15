@@ -18,6 +18,7 @@ void Data::isItExist(){
 
 
 void Data::setDate(QString gDate){
+    gDate=gDate.replace(20, 3, "000");
     modifiedDate = QDateTime::fromString(gDate, "yyyy-MM-ddThh:mm:ss.zzzZ");
     modifiedDate.setTimeSpec(Qt::UTC);
 }
@@ -34,6 +35,65 @@ void Data::setIcon(QString icon){
 
 QString Data::getDate(){
     return modifiedDate.toString("yyyy-MM-ddThh:mm:ss.zzzZ");
+}
+
+bool Data::download(){
+    if(exist){
+//        qWarning("exist");
+        if(isMd5ChecksumCoincide()){
+//            qWarning("md5 true");
+            return false;
+        } else {
+//            qWarning("md5 false");
+            if(isLocalModifiedDateEarlier()){
+//                qWarning("date erlier");
+                return true;
+            } else {
+//                qWarning("date later");
+                return false;
+            }
+        }
+    } else {
+//        qWarning("not exist");
+        return true;
+    }
+
+}
+
+bool Data::isMd5ChecksumCoincide(){
+    QFile file(filename);
+    if (file.open(QIODevice::ReadOnly)) {
+        QByteArray fileData = file.readAll();
+        QByteArray hashData = QCryptographicHash::hash(fileData, QCryptographicHash::Md5);
+
+        if(hashData.toHex()==md5Checksum)
+            return true;
+        else
+            return false;
+    } else {
+        return isMd5ChecksumCoincide();
+    }
+}
+
+bool Data::isLocalModifiedDateEarlier(){
+    QFile file(filename);
+    QFileInfo info(file);
+    if(info.lastModified().toUTC()<modifiedDate)
+        return true;
+    else
+        return false;
+}
+
+void Data::setModifiedDate(){
+    QString temp=filename;
+    for(int i=1; i<temp.length();i+=2){
+        temp=temp.insert(i, '\\');
+    }
+    QStringList arguments;
+    arguments << "-c" << QString("touch -mt %1 %2").arg(modifiedDate.toLocalTime().toString("yyyyMMddhhmm.ss")).arg(temp);
+    QProcess exec;
+    exec.start("/bin/sh", arguments);
+    while(exec.waitForFinished()){}
 }
 
 void Data::display(){
@@ -58,13 +118,13 @@ void Data::display(){
 QDataStream& operator << (QDataStream& out, const Data& obj)
 {
     out << obj.title << obj.isFolder << obj.path << obj.downloadUrl << obj.fileExtension << obj.md5Checksum << obj.fileSize << obj.icon << obj.filename
-            << obj.originalName << obj.parentId << obj.exist << obj.modifiedDate << obj.isOnline << obj.isRoot;
+        << obj.originalName << obj.parentId << obj.exist << obj.modifiedDate << obj.isOnline << obj.isRoot;
     return out;
 }
 
 QDataStream& operator >> (QDataStream& in, Data& obj)
 {
     in >> obj.title >> obj.isFolder >> obj.path >> obj.downloadUrl >> obj.fileExtension >> obj.md5Checksum >> obj.fileSize >> obj.icon >> obj.filename
-            >> obj.originalName >> obj.parentId >> obj.exist >> obj.modifiedDate >> obj.isOnline >> obj.isRoot;
+       >> obj.originalName >> obj.parentId >> obj.exist >> obj.modifiedDate >> obj.isOnline >> obj.isRoot;
     return in;
 }

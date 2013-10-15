@@ -18,6 +18,7 @@ public:
     void display();
     void save();
     void load();
+    void clear();
 
     int downloadedFiles;
     int filesQuantity;

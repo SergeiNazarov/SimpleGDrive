@@ -31,7 +31,7 @@ signals:
 private slots:
     void refreshToken();
     void setSettings();
-    void setFilesTree();
+    void setUI();
 
     void on_actionForm_files_list_triggered();
 

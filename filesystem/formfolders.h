@@ -35,8 +35,6 @@ private:
     void linkingOnlineFiles(QString filename, QString url, QString title);
     void downloadFile(QString filename, QUrl url);
 
-    int n;
-
     QProgressBar *progressBar;
     QStatusBar *statusBar;
 

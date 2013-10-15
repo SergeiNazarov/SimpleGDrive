@@ -22,6 +22,7 @@ FormListOfFiles::FormListOfFiles(QTreeWidget *tw, QStatusBar *status, DataBase *
 }
 
 void FormListOfFiles::startObtaining(){
+    db->clear();
     statusBar->showMessage("Obtaining list of files...");
     getList("root");
 }
@@ -36,6 +37,7 @@ void FormListOfFiles::getList(QString folderId){
 }
 
 void FormListOfFiles::getReply(QNetworkReply *reply){
+    statusBar->showMessage("Obtaining list of files...");
     finishedNetworkAccessManagers++;
     QString json = reply->readAll();
     if(isRoot){
@@ -85,8 +87,8 @@ void FormListOfFiles::formRootList(QString json){
                 temp.md5Checksum=file["md5Checksum"].toString();
                 temp.fileSize=file["fileSize"].toString().toInt();
             }
-        }
         db->dataBase.insert(file["id"].toString(),temp);
+        }
     }
     generalSettings->setValue("listFormed", true);
 }
@@ -124,10 +126,10 @@ void FormListOfFiles::formList(QString json){
                 temp.md5Checksum=file["md5Checksum"].toString();
                 temp.fileSize=file["fileSize"].toString().toInt();
             }
+            mutex.lock();
+            db->dataBase.insert(file["id"].toString(),temp);
+            mutex.unlock();
         }
-        mutex.lock();
-        db->dataBase.insert(file["id"].toString(),temp);
-        mutex.unlock();
     }
     if(startedNetworkAccessManagers==finishedNetworkAccessManagers){
         emit readyToFillTreeWidget();
@@ -188,7 +190,7 @@ void FormListOfFiles::setFilesTree(bool localCall){
     treeWidget->setSortingEnabled(true);
     treeWidget->sortByColumn(1);
 
-    statusBar->showMessage("List of files obtained", 60);
+    statusBar->showMessage("List of files obtained", 600);
 
     if(localCall){
         db->save();

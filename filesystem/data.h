@@ -3,8 +3,12 @@
 
 #include <QIcon>
 #include <QFile>
+#include <QFileInfo>
 #include <QDateTime>
 #include <QMetaType>
+#include <QProcess>
+#include <QCryptographicHash>
+
 
 class Data
 {
@@ -16,6 +20,10 @@ public:
     QString getDate();
     void setIcon(QString icon);
     void display();
+    bool download();
+    bool isMd5ChecksumCoincide();
+    bool isLocalModifiedDateEarlier();
+    void setModifiedDate();
 
     QString title;
     bool isFolder=false;
@@ -23,7 +31,7 @@ public:
     QString downloadUrl;
     QString fileExtension;
     QString md5Checksum;
-    qint64 fileSize;
+    qint64 fileSize=0;
     QIcon icon;
     QString filename;
     QString originalName;
