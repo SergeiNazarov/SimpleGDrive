@@ -12,6 +12,7 @@
 #include <QTreeWidget>
 #include <QMutex>
 #include <QStatusBar>
+#include <QProgressBar>
 
 #include "data.h"
 #include "database.h"
@@ -43,7 +44,7 @@ class FormListOfFiles : public QObject
 {
     Q_OBJECT
 public:
-    explicit FormListOfFiles(QTreeWidget *tw = 0, QStatusBar *status = 0, DataBase *db = 0, QObject *parent = 0);
+    explicit FormListOfFiles(QTreeWidget *tw = 0, QStatusBar *status = 0, QProgressBar *progressBar = 0, DataBase *db = 0, QObject *parent = 0);
     void getFullList();
     void addRootQTreeWidgetItem(QString id, QString path);
 
@@ -82,6 +83,8 @@ private:
     QTreeWidget *treeWidget;
 
     QStatusBar *statusBar;
+
+    QProgressBar *progressBar;
 
     DataBase *db;
 

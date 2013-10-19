@@ -6,10 +6,11 @@
 #include <QDebug>
 
 
-FormListOfFiles::FormListOfFiles(QTreeWidget *tw, QStatusBar *status, DataBase *db, QObject *parent) :
+FormListOfFiles::FormListOfFiles(QTreeWidget *tw, QStatusBar *status, QProgressBar *progressBar, DataBase *db, QObject *parent) :
     QObject(parent),
     treeWidget(tw),
     statusBar(status),
+    progressBar(progressBar),
     db(db)
 {
     generalSettings = new QSettings("SimpleGDrive", "General");
@@ -190,7 +191,16 @@ void FormListOfFiles::setFilesTree(bool localCall){
     treeWidget->setSortingEnabled(true);
     treeWidget->sortByColumn(1);
 
-    statusBar->showMessage("List of files obtained", 600);
+    db->countAllFiles();
+    db->verifyExisting();
+    db->countDownloadedFiles();
+    progressBar->setMaximum(db->filesQuantity);
+    progressBar->setValue(db->downloadedFiles);
+    progressBar->setTextVisible(true);
+    QString text(QString("%1/%2").arg(db->downloadedFiles).arg(db->filesQuantity));
+    progressBar->setFormat(text);
+
+    statusBar->showMessage("List of files obtained", 1500);
 
     if(localCall){
         db->save();

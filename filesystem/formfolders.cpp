@@ -38,6 +38,7 @@ void FormFolders::makeRootFolder(QString rootDir){
     }
 
     foreach (Data file, db->dataBase) {
+        QCoreApplication::processEvents();
         if(!file.isFolder){
             if(file.isOnline){
                 linkingOnlineFiles(file.filename, file.downloadUrl, file.title);

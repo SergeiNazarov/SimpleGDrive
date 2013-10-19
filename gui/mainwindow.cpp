@@ -50,6 +50,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
      ui->statusBar->showMessage(tr("Ready"));
 
+     connect(ui->rootDirectory, SIGNAL(textChanged(QString)), this, SLOT(setSettings()));
+
 }
 
 MainWindow::~MainWindow()
@@ -62,18 +64,23 @@ void MainWindow::setSettings(){
     ui->LogedAs->setText("You logged in as:\t"+generalSettings->value("email").toString());
     ui->rootDirectory->setText(generalSettings->value("rootDir").toString());
     if(!generalSettings->contains("refresh_token")) QTimer::singleShot(120000, this, SLOT(setSettings()));
+
+    if(ui->rootDirectory->text()!="") {
+        ui->actionForm_files_list->setEnabled(true);
+        ui->actionForm_files_list->setToolTip("Form files list");
+    }
+    if(ui->rootDirectory->text()!="" && generalSettings->value("listFormed").toBool()) {
+        ui->actionDownload_all_files->setEnabled(true);
+        ui->actionDownload_all_files->setToolTip("Download all files");
+    }
 }
 
 void MainWindow::setUI(){
-    if(db->filesQuantity!=0)
-        ui->progressBar->setValue((db->downloadedFiles)/(db->filesQuantity)*100);
-    else
-        ui->progressBar->setValue(0);
-
     if(generalSettings->value("listFormed").toBool()){
-        FormListOfFiles *flof = new FormListOfFiles(ui->treeWidget, ui->statusBar, db);
+        FormListOfFiles *flof = new FormListOfFiles(ui->treeWidget, ui->statusBar, ui->progressBar, db);
         flof->setFilesTree(false);
     }
+    ui->label->setOpenExternalLinks(true);
 }
 
 void MainWindow::refreshToken()
@@ -85,8 +92,10 @@ void MainWindow::refreshToken()
 
 void MainWindow::on_actionForm_files_list_triggered()
 {
-    FormListOfFiles *flof = new FormListOfFiles(ui->treeWidget, ui->statusBar, db);
+    FormListOfFiles *flof = new FormListOfFiles(ui->treeWidget, ui->statusBar,ui->progressBar, db);
     flof->startObtaining();
+    ui->actionDownload_all_files->setEnabled(true);
+    ui->actionDownload_all_files->setToolTip("Download all files");
 }
 
 void MainWindow::on_actionDownload_all_files_triggered()
@@ -98,8 +107,8 @@ void MainWindow::on_actionDownload_all_files_triggered()
 void MainWindow::on_chooseDirButton_clicked()
 {
     QString rootdir = QFileDialog::getExistingDirectory(this, tr("Open Directory"), "", QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
-    ui->rootDirectory->setText(rootdir);
     generalSettings->setValue("rootDir", rootdir);
+    ui->rootDirectory->setText(rootdir);
 }
 
 void MainWindow::logout(){
