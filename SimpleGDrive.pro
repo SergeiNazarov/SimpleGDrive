@@ -17,7 +17,6 @@ SOURCES += main.cpp\
         gui/mainwindow.cpp \
     gui/logindialog.cpp \
     network/authorization.cpp \
-    settings.cpp \
     initiation.cpp \
     filesystem/formlistoffiles.cpp \
     filesystem/formfolders.cpp \
@@ -31,7 +30,6 @@ SOURCES += main.cpp\
 HEADERS  += gui/mainwindow.h \
     gui/logindialog.h \
     network/authorization.h \
-    settings.h \
     initiation.h \
     filesystem/formlistoffiles.h \
     filesystem/formfolders.h \
